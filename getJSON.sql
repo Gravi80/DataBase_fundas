@@ -1,5 +1,7 @@
 create database demo;
 
+drop table Orders;
+drop table Persons;
 
 CREATE TABLE Persons(
 	P_Id Serial NOT NULL,
@@ -24,14 +26,14 @@ insert into Persons values(3,'Chetan','Bangalore');
 
 insert into Orders values(1,1,1,'Sports Equipment');
 insert into Orders values(2,2,3,'Books');
-insert into Orders values(3,3,2,'Furnitures');
-insert into Orders values(4,4,1,'Sports Equipment');
+insert into Orders values(3,3,1,'Furnitures');
+insert into Orders values(4,4,2,'Sports Equipment');
 insert into Orders values(5,5,2,'Furnitures');
 insert into Orders values(6,6,3,'Sports Equipment');
-insert into Orders values(7,7,1,'Sports Equipment');
-insert into Orders values(8,8,2,'Medical');
-insert into Orders values(9,9,3,'Books');
-insert into Orders values(10,10,2,'Furnitures');
+insert into Orders values(7,7,2,'Sports Equipment');
+insert into Orders values(8,8,1,'Medical');
+insert into Orders values(9,9,2,'Books');
+insert into Orders values(10,10,3,'Furnitures');
 
 
 -- This will return a single column per row in the words table.
