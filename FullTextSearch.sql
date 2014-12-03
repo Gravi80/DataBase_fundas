@@ -1,6 +1,10 @@
 -- tsvector => Text Search Vector
 -- to_tsvector parses a textual document into tokens, reduces the tokens to lexemes, and returns a tsvector which lists the lexemes together with their positions in the document.
 
+-- to_tsquery and plainto_tsquery for converting a query to the tsquery data type.
+
+
+
 create database demo;
 
 /* Full Text Search */
@@ -53,17 +57,9 @@ SELECT id,comments  FROM blog where comments @@ to_tsquery('Program');
 
 SELECT id,comments,ts_rank(comment_tsvector, plainto_tsquery('english_nostop','Ruby'), 1 ) AS rank FROM blog where comments @@ to_tsquery('Ruby');
 
-SELECT id,comments,ts_rank(comment_tsvector, plainto_tsquery('english_nostop','Ruby,Rails'), 1 ) AS rank FROM blog WHERE to_tsvector('english_nostop', COALESCE(comments,'') || ' ' || COALESCE(comments,'')) @@ to_tsquery('english_nostop','Ruby') group by id,comments,comment_tsvector order by rank desc;
+SELECT id,comments,ts_rank_cd(comment_tsvector, plainto_tsquery('english_nostop','Ruby'), 1 ) AS rank FROM blog where comments @@ to_tsquery('Ruby');
 
-SELECT q AS (SELECT to_tsquery('Ruby & Rails') AS query),
-	   ranked AS(
-	   		SELECT id,comments,ts_rank_cd(comment_tsvector,query) AS rank
-	   		FROM blog,query
-	   		WHERE q.query @@ comment_tsvector
-	   		ORDER BY rank DESC
-	   		LIMIT 10
-	   	)
-SELECT id,ts_headline(comments,q.query) FROM ranked,q ORDER BY ranked DESC;	   
+SELECT id,comments,ts_rank(comment_tsvector, plainto_tsquery('english_nostop','Ruby,Rails'), 1 ) AS rank FROM blog WHERE to_tsvector('english_nostop', COALESCE(comments,'') || ' ' || COALESCE(comments,'')) @@ to_tsquery('english_nostop','Ruby') group by id,comments,comment_tsvector order by rank desc;
 
 /************************************************ OR **************************************************/
 
