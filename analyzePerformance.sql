@@ -121,6 +121,7 @@ ORDER BY n_live_tup DESC;
 	http://feeding.cloud.geek.nz/posts/troubleshooting-postgres-performance/
 	http://onewebsql.com/blog/monitoring-postgresql	
 	http://www.westnet.com/~gsmith/content/postgresql/index.htm
+  https://github.com/heroku/heroku-pg-extras
 */
 
 
