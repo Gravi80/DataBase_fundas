@@ -1,0 +1,9 @@
+\pset null '[NULL]'
+\x auto
+\set COMP_KEYWORD_CASE upper
+\set PROMPT1 '%[%033[1m%]%M %n@%/%R%[%033[0m%]%# '
+\set PROMPT2 '[more] %R > '
+\pset border 2
+\pset format wrapped
+\pset linestyle unicode
+\setenv PAGER less

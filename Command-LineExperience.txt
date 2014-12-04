@@ -48,7 +48,7 @@ Change Table Styles
 \pset border 0				=> turn off borders
 \pset border 2				=> add more borders
 
-\pset linestyle unicode    => use unicode characters to draw borders
+\pset linestyle 	unicode    => use unicode characters to draw borders
 
 
 
@@ -56,10 +56,6 @@ Changing the PROMPT1
 ====================
 There are a lot of options for changing the prompt. You can add colors, domain names, the name of the current database, and more.
 
-
-\set PROMPT1 '%n@%/\n%R%x%# '
-
-OR
 
 \set PROMPT1 '%[%033[1m%]%M %n@%/%R%[%033[0m%]%#'
 
@@ -77,9 +73,6 @@ Changing the PROMPT2
 =====================
 PROMPT2 is used when psql is waiting for more input, like when you type SELECT * FROM then hit enter - you haven’t typed a semicolon, so psql patiently displays PROMPT2 and waits.
 
-\set PROMPT2 '%R%x%# '
-
-OR
 
 \set PROMPT2 '[more] %R > '
 
@@ -122,12 +115,11 @@ OR
 
 \set COMP_KEYWORD_CASE upper
 
+\set PROMPT1 '%[%033[1m%]%M %n@%/%R%[%033[0m%]%#'
 
-\set PROMPT1 '%n@%/\n%R%x%# '
+\set PROMPT2 '[more] %R > '
 
-\set PROMPT2 '%R%x%# '
-
-\pset border 1
+\pset border 2
 
 \pset format wrapped
 
