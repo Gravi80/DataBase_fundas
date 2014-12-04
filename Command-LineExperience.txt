@@ -1,3 +1,14 @@
+
+run a command from terminal
+===========================
+
+psql -d Ravi -c 'select * from Persons;' -F, -A -t
+
+
+it gives you output in csv format
+
+
+
 Shortcuts
 =========
 \d  				=>	listing all relations  
