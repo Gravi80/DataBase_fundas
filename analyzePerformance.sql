@@ -41,6 +41,7 @@ cost 0.00 => startup time
 
 6291129 => rows return
 
+width   => the size of the rows in bytes
 
 */
 
