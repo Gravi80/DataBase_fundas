@@ -1,3 +1,6 @@
+ -- 	\timing   => will display timing after each query at client side
+
+
 -- Explain => gives u information about how the query is been executed, 
 -- 			  what is the plan/path the optimizer has taken to execute that query.
 
@@ -42,6 +45,9 @@ cost 0.00 => startup time
 */
 
 
+
+
+
 EXPLAIN SELECT sName FROm Student where sName='Gary';
 
 /*
@@ -53,6 +59,25 @@ EXPLAIN SELECT sName FROm Student where sName='Gary';
 
 
 */
+
+
+
+
+
+EXPLAIN(ANALYZE TRUE, TIMING FALSE) SELECT sName FROm Student where sName='Gary';
+
+/*
+
+                                         QUERY PLAN
+----------------------------------------------------------------------------------------------
+ Seq Scan on student  (cost=0.00..117777.11 rows=522793 width=5) (actual rows=524288 loops=1)
+   Filter: (sname = 'Gary'::text)
+   Rows Removed by Filter: 5767168
+ Total runtime: 670.702 ms
+
+*/
+
+
 
 
 EXPLAIN ANALYZE SELECT sName FROm Student where sName='Gary';
@@ -84,3 +109,17 @@ Total runtime: 683.569 ms   => actual time
 SELECT relname, 100 * idx_scan / (seq_scan + idx_scan) percent_of_times_index_used, n_live_tup rows_in_table  
 FROM pg_stat_user_tables 
 ORDER BY n_live_tup DESC;
+
+
+
+
+-- other postgres tools/links
+/*
+	auto_explain,pg_stat_statements
+
+	http://feeding.cloud.geek.nz/posts/troubleshooting-postgres-performance/
+	http://onewebsql.com/blog/monitoring-postgresql	
+	http://www.westnet.com/~gsmith/content/postgresql/index.htm
+*/
+
+
