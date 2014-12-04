@@ -40,3 +40,23 @@ database.
 
 */  
 
+
+-- Find relation sizes in PostgreSQL
+
+select
+  n.nspname as "Schema",
+  c.relname as "Name",
+  case c.relkind
+     when 'r' then 'table'
+     when 'v' then 'view'
+     when 'i' then 'index'
+     when 'S' then 'sequence'
+     when 's' then 'special'
+  end as "Type",
+  pg_catalog.pg_get_userbyid(c.relowner) as "Owner",
+  pg_catalog.pg_size_pretty(pg_catalog.pg_relation_size(c.oid)) as "Size"
+from pg_catalog.pg_class c
+ left join pg_catalog.pg_namespace n on n.oid = c.relnamespace
+where c.relkind IN ('r', 'v', 'i')
+order by pg_catalog.pg_relation_size(c.oid) desc;
+
