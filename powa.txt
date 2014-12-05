@@ -1,0 +1,115 @@
+https://github.com/dalibo/powa/
+
+POWA is a workload analyzer that gives a clear view of the current activity of your PostgreSQL servers with a query runtime graph and a block hit/read graph along with a chart of time consuming request over the specified time period.
+
+If you zoom anywhere in one of the graphs, the chart will adjust and show you which queries were running at that time. If you click on a specific query, you will get additional graphs such as read/write time, number of rows affected, local and shared hit, etc.
+
+
+PoWA requires PostgreSQL 9.3 or more.
+
+Download PoWA from the website
+================================
+$wget https://github.com/dalibo/powa/archive/REL_1_2.zip
+
+Unpack the downloaded file
+============================
+$unzip REL_1_2.zip
+
+
+$cd powa-REL_1_2
+$make
+
+If everything goes fine, you will have this kind of output :
+-------------------------------------------------------------------------------------
+gcc -Wall -Wmissing-prototypes -Wpointer-arith -Wdeclaration-after-statement -Wendif-labels -Wmissing-format-attribute -Wformat-security -fno-strict-aliasing -fwrapv -fexcess-precision=standard -g -fpic -I. -I. -I/home/thomas/postgresql/postgresql-9.3.4/include/server -I/home/thomas/postgresql/postgresql-9.3.4/include/internal -D_GNU_SOURCE -I/usr/include/libxml2   -c -o powa.o powa.c
+
+gcc -Wall -Wmissing-prototypes -Wpointer-arith -Wdeclaration-after-statement -Wendif-labels -Wmissing-f
+-------------------------------------------------------------------------------------
+
+$sudo make install   (made with the user that has installed PostgreSQL)
+
+
+It should output something like the following :
+-------------------------------------------------------------------------------------
+/bin/mkdir -p '/usr/pgsql-9.3/share/extension'
+/bin/mkdir -p '/usr/pgsql-9.3/share/extension'
+/bin/mkdir -p '/usr/pgsql-9.3/lib'
+/bin/mkdir -p '/usr/pgsql-9.3/share/doc/extension'
+/usr/bin/install -c -m 644 ./powa.control '/usr/pgsql-9.3/share/extension/'
+/usr/bin/install -c -m 644 ./powa--1.0.sql ./powa--1.1.sql ./powa--1.2.sql ./powa--1.1--1.2.sql  '/usr/pgsql-9.3/share/extension/'
+/usr/bin/install -c -m 755  powa.so '/usr/pgsql-9.3/postgresql-9.3.4/lib/'
+/usr/bin/install -c -m 644 ./README.md '/usr/pgsql-9.3/share/doc/extension/'
+-------------------------------------------------------------------------------------
+
+
+Create a PoWA database and create required extensions
+=======================================================
+
+connect to PostgreSQL as administrator :
+
+postgres=# create database powa;
+postgres=# \c powa
+powa=# create extension pg_stat_statements ;
+powa=# create extension btree_gist ;
+powa=# create extension powa;
+
+powa=# \dt
+
+                       List of relations
+┌────────┬────────────────────────────────────┬───────┬───────┐
+│ Schema │                Name                │ Type  │ Owner │
+├────────┼────────────────────────────────────┼───────┼───────┤
+│ public │ powa_functions                     │ table │ Ravi  │
+│ public │ powa_last_aggregation              │ table │ Ravi  │
+│ public │ powa_last_purge                    │ table │ Ravi  │
+│ public │ powa_statements                    │ table │ Ravi  │
+│ public │ powa_statements_history            │ table │ Ravi  │
+│ public │ powa_statements_history_current    │ table │ Ravi  │
+│ public │ powa_statements_history_current_db │ table │ Ravi  │
+│ public │ powa_statements_history_db         │ table │ Ravi  │
+└────────┴────────────────────────────────────┴───────┴───────┘
+
+
+Modify the configuration files
+===============================
+In postgresql.conf
+-------------------
+shared_preload_libraries = 'powa,pg_stat_statements'  #(change requires restart)
+track_io_timing = on
+
+configure (configuration parameters)GUC in postgresql.conf
+
+powa.frequency : Defines the frequency of the snapshots. Minimum 5s. You can use the 				  usual postgresql time abbreviations. If not specified, the unit is 				  seconds. Defaults to 5 minutes. Setting it to -1 will disable powa (				   powa will still start, but it won't collect anything anymore, and 					 wont connect to the database).
+
+powa.retention : Automatically purge data older than that. If not specified, the unit 				   is minutes. Defaults to 1 day.
+
+powa.database  : Defines the database of the workload repository. Defaults to powa.
+
+powa.coalesce  : Defines the amount of records to group together in the table.
+				 The more you coalesce, the more PostgreSQL can compress. But the more it has to uncompact when queried. Defaults to 100.
+
+
+If you can afford it, put a rather high work_mem for the database powa. It will help, as the queries used to display the ui are doing lots of sampling, implying lots of sorts.
+
+We use this: ALTER DATABASE powa SET work_mem TO '256MB';
+
+It's only used for the duration of the queries anyway, this is not statically allocated memory.
+
+
+In pg_hba.conf:
+----------------
+Add an entry if needed for the PostgreSQL user(s) that need to connect on the GUI. For instance, assuming a local connection on database powa, allowing any user:
+
+host powa all 127.0.0.1/32 md5
+
+
+
+Reset the stats:
+================
+SELECT powa_stats_reset(); (in the powa database of course)
+
+
+
+For Configuring UI
+==================
+https://github.com/dalibo/powa/blob/master/ui/README.md
