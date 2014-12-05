@@ -20,3 +20,22 @@ now(),
 now()
 );
 
+
+/*
+Query hstore
+=============
+
+defined(A,B)		=> Does A have B ?
+
+A -> B 				=> Get B from A. in Ruby it would be A[B].
+
+*/
+
+SELECT id,email,data->'country' as Country
+from users
+WHERE defined(data,'country');
+
+-- Get all the countries of the users from data field
+-- defined(data,'country')  => only return the records where we actually have 
+-- country defined for field data
+

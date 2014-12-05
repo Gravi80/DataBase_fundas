@@ -1,8 +1,50 @@
--- tsvector => Text Search Vector
--- to_tsvector parses a textual document into tokens, reduces the tokens to lexemes, and returns a tsvector which lists the lexemes together with their positions in the document.
+/*
 
--- to_tsquery and plainto_tsquery for converting a query to the tsquery data type.
+Two Important Data Type
+==========================
+tsvector => Text Search Vector, represent the text that has been pre-processed for postgres to search.
+tsquery  => represents search query
 
+*/
+
+
+/*
+There are two main function that converts string into these types:
+=================================================================
+
+to_tsvector(configuration,text) => creates a normalized tsvector.It parses 
+									a textual document into tokens, 
+									reduces the tokens to lexemes, 
+									and returns a tsvector which lists 
+									the lexemes together with their 
+									positions in the document.
+
+to_tsquery(configuration,text) and plainto_tsquery(configuration,text) =>
+									for converting a query to the normalized 
+									tsquery data type.
+
+
+configuration = search configuration , like english 
+
+text => you want to convert into the vector to be searched or the query to 
+		be doing search on a vector.
+
+*/
+
+
+/*
+Operators
+==========
+
+	Vectors:
+		V @@ Q 			=> search V for Q
+
+	Queries:
+		V @@ (A && B)	=> Searches V for A and B
+		V @@ (A || B)	=> Searches V for A or B
+
+
+*/
 
 
 create database demo;
@@ -99,15 +141,110 @@ select id,comments from(SELECT id,comments,to_tsvector(comments) as comments_vec
 
 
 
+
+-- **************************** Example 2 **********************************
+
+CREATE TABLE comments(
+	id integer primary key,
+	user_id integer,
+	body text
+);
+
+
+INSERT into comments values(1,1,'lets enjoye studying maths');
+INSERT into comments values(2,1,'enjoyed fullest');
+INSERT into comments values(3,1,'enjoying in the garden');
+INSERT into comments values(4,2,'Rain Rain come Again');
+INSERT into comments values(5,2,'cat');
+INSERT into comments values(6,2,'catapult');
+INSERT into comments values(7,2,'cataclysmic');
+INSERT into comments values(8,2,'octocat');
+INSERT into comments values(9,2,'scatter');
+INSERT into comments values(10,2,'prognosticate');
+INSERT into comments values(11,1,'What brand of oil do you use? Have you tried QuillSwill?');
+
+
+-- Find comments about "enjoying" something
+
+-- V @@ Q 			=> search V for Q
+
+SELECT body
+FROM comments
+WHERE to_tsvector('english',body)
+	@@ to_tsquery('english','enjoying');
+
+┌────────────────────────────┐
+│            body            │
+├────────────────────────────┤
+│ lets enjoye studying maths │
+│ enjoyed fullest            │
+│ enjoying in the garden     │
+└────────────────────────────┘
+
+/*
+ we gonna prepare the body of our comment by calling to_tsvector() on it 
+ with english search configuration.
+ then we gonna query that for the query term 'enjoying'
+*/
+
+-- Search Anything starting with cat
+-- tsquery only supports wildcard only end of a term
+
+SELECT body
+FROM comments
+WHERE to_tsvector('english',body)
+	@@ to_tsquery('english','cat:*');
+
+┌─────────────┐
+│    body     │
+├─────────────┤
+│ cat         │
+│ catapult    │
+│ cataclysmic │
+└─────────────┘
+
+but do not : octocat,scatter,prognosticate
+
+
+
+-- Find Comments containing the term "oil" , and a word starting with "quil"
+SELECT body	
+FROM comments
+WHERE to_tsvector('english',body)
+@@ (to_tsquery('english','oil') && to_tsquery('english','quil:*')
+);
+
+┌──────────────────────────────────────────────────────────┐
+│                           body                           │
+├──────────────────────────────────────────────────────────┤
+│ What brand of oil do you use? Have you tried QuillSwill? │
+└──────────────────────────────────────────────────────────┘
+
+
+
+
+
+
 -- Index
 -- =========
 /*
 	Create Index blog_indx ON blog using GIN(comment_tsvector);
+	
+	The Gin Index is a special index for multivalued like
+	a text[] or a tsvector.
 
 	two basic type of index used for full text search GIN and GIST.
 	GIN takes a little bit longer time to build the index but performance on queries is better.
 
 */
+
+
+-- CREATE an index on the function call to_tsvector('english',body)
+
+CREATE INDEX comments_gin_index
+ON comments
+USING gin(to_tsvector('english',body));
+
 
 /*
 

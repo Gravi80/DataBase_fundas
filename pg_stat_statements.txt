@@ -61,3 +61,7 @@ LIMIT 100;
 	1).The total time a query has occupied against your system in minutes
 	2).The average time it takes to run in milliseconds
 	3).The query itself
+
+
+
+select * from pg_stat_statements where query ~ 'from Student where sname';	
