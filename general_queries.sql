@@ -1,3 +1,22 @@
+-- Get Postgres Version
+select version();
+
+-- Get Postgres Config Location
+SHOW config_file;
+
+-- Get postgres location
+select name, setting from pg_settings where name = 'data_directory';
+
+--Restart Postgres In Mac
+
+$pg_ctl restart -D /usr/local/var/postgres --Location which you got from above query
+
+
+--Start Postgres
+$pg_ctl -D /usr/local/var/postgres -l /usr/local/var/postgres/server.log start
+
+
+
 -- Get number of rows of all tables in a database
 
 SELECT schemaname,relname,n_live_tup number_of_rows
@@ -32,7 +51,24 @@ FROM
 heap_read | heap_hit |         ratio
 -----------+----------+------------------------
     236163 |  6800983 | 0.96644051437898261596
+*/
 
+
+-- *************************** OR *************************************
+
+SELECT 'index hit rate' as name,
+        (sum(idx_blks_hit)-sum(idx_blks_read))/sum(idx_blks_hit+idx_blks_read) as ratio
+FROM pg_statio_user_indexes
+UNION ALL
+SELECT 'cache hit rate' as name,
+case  sum(idx_blks_hit)
+  when 0 then 'NaN'::numeric
+  else to_char((sum(idx_blks_hit)-sum(idx_blks_read))/sum(idx_blks_hit+idx_blks_read),'99.99')::numeric
+end as ratio
+FROM pg_statio_user_indexes;
+ 
+
+/*
 
 If you find yourself with a ratio significantly lower than 99% 
 then you likely want to consider increasing the cache available to your 

@@ -35,11 +35,11 @@ EXPLAIN SELECT sName FROm Student;
  Seq Scan on student  (cost=0.00..102049.29 rows=6291129 width=5)
 
 
-cost 0.00 => startup time
+cost 0.00 => startup time, how long it takes to start that process 
 
-102049.29 => max time
+102049.29 => max time , how much time it thinks it is going to take
 
-6291129 => rows return
+6291129 => rows return, how many rows it thinks its going to return
 
 width   => the size of the rows in bytes
 
@@ -51,6 +51,7 @@ width   => the size of the rows in bytes
 
 EXPLAIN SELECT sName FROm Student where sName='Gary';
 
+-- only gives the query plan
 /*
 	
                            QUERY PLAN
@@ -83,6 +84,7 @@ EXPLAIN(ANALYZE TRUE, TIMING FALSE) SELECT sName FROm Student where sName='Gary'
 
 EXPLAIN ANALYZE SELECT sName FROm Student where sName='Gary';
 
+-- actualy executes the query
 /*
 
                             QUERY PLAN
@@ -95,11 +97,11 @@ EXPLAIN ANALYZE SELECT sName FROm Student where sName='Gary';
 
 actual time=0.064 			=> startup time
 
-658.674 					=> max time
+658.674 					=> max time it thinks it will take 
 
 rows=524288					=> rows return
 
-Total runtime: 683.569 ms   => actual time
+Total runtime: 683.569 ms   => actual time it has taken
 
 */
 
@@ -113,6 +115,31 @@ ORDER BY n_live_tup DESC;
 
 
 
+-- Rough Guidlines
+
+/*
+  Cache hit ratio >= 99%
+  Index hit ration >= 95%
+  Where on > 10,000 rows
+*/
+
+/* total run time
+   -----------------
+  Page response times < 100ms
+  Common queries < 10ms
+  Rare queries < 100ms
+*/
+
+
+
+-- Show Slow Queries
+
+SELECT 
+  (total_time/1000/60) as total_minutes,
+  (total_time/calls) as average_time,query
+FROM  pg_stat_statements
+ORDER BY 1 DESC
+LIMIT 100;  
 
 -- other postgres tools/links
 /*

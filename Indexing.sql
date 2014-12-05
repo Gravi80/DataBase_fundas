@@ -1,3 +1,14 @@
+-- Types Of Indexes
+/*
+	B-Tree
+	Generalized Inverted Index (GIN) => if u got multiple values in a single column like Array/hstore
+	Genralized Search Tree (GIST) => Full Text search and shapes 
+	K Nearest Neighbors (KNN)
+	Space Partitioned GIST (SP-GIST) => good for phone numbers
+*/
+
+
+
 -- Get Index Use Details
 
 SELECT relname, 100 * idx_scan / (seq_scan + idx_scan) percent_of_times_index_used, n_live_tup rows_in_table  

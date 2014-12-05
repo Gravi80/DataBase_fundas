@@ -1,0 +1,61 @@
+Postgres 9.2 includes a very handy pg_stat_statements shared library and extension which allows immediate insight into query performance.
+
+The module must be loaded by adding pg_stat_statements to shared_preload_libraries in postgresql.conf, because it requires additional shared memory.
+
+Installation:
+------------
+
+1. Add to postgresql.conf:
+
+shared_preload_libraries = 'pg_stat_statements'
+
+2. Restart PostgreSQL.
+
+3. Run
+
+
+CREATE EXTENSION pg_stat_statements;
+
+to have access to the statistics and the helper functions.
+
+
+Use
+====
+
+reset statistic
+----------------
+SELECT pg_stat_statements_reset();
+
+
+which query was called the most
+-------------------------------
+select * from pg_stat_statements order by calls desc;
+
+
+which query used the most CPU time
+-----------------------------------
+select * from pg_stat_statements order by total_time desc;
+
+
+report time, calls, row and hit percentage
+-------------------------------------------
+SELECT query,calls,total_time,rows,
+100.0 * shared_blks_hit / nullif(shared_blks_hit + shared_blks_read, 0) AS hit_percent
+FROM pg_stat_statements
+ORDER BY total_time
+DESC LIMIT 5;
+
+
+
+SELECT 
+  (total_time / 1000 / 60) as total_minutes, 
+  (total_time/calls) as average_time, 
+  query 
+FROM pg_stat_statements 
+ORDER BY 1 DESC 
+LIMIT 100;
+
+
+	1).The total time a query has occupied against your system in minutes
+	2).The average time it takes to run in milliseconds
+	3).The query itself
