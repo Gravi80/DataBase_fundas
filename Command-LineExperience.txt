@@ -13,6 +13,7 @@ Shortcuts
 =========
 \d  				=>	listing all relations  
 \dt					=>	list only all tables
+\dn				=> list all schemas 
 \d relation_name	=>	Describe a specific relation
 \x auto				=>	formatting output
 \o file_name		=>	want to open your results in your editor or a 								spreadsheet for further analysis,
