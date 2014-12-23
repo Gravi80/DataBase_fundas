@@ -96,3 +96,11 @@ from pg_catalog.pg_class c
 where c.relkind IN ('r', 'v', 'i')
 order by pg_catalog.pg_relation_size(c.oid) desc;
 
+
+create encrypted password for user
+------------------------------------
+
+create user foo unencrypted password 'foopassword';
+create user bar encrypted password 'foopassword';
+select usename,passwd from pg_shadow where usename in ('postgres','foo','bar');
+
