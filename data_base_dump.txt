@@ -1,0 +1,57 @@
+Postgres DataBase Dump
+=======================
+
+create dump file of a database
+------------------------------
+
+pg_dump dbname > outfile
+pg_dump -h localhost database_name > ~/Desktop/demo/file_name.dump
+
+
+restore dump file in database
+-----------------------------
+psql dbname < infile
+
+psql -Upostgres -hlocalhost database_name < ~/Desktop/demo/file_name.dump
+
+psql -U postgres -d database_name -f ~/Desktop/demo/file_name.tar
+
+
+
+take dump of a table:->
+-----------------------
+psql -U postgres -c "COPY table_name TO '/tmp/file_name.csv' DELIMITER ',' CSV HEADER" -d database_name
+
+insert dump from file to table :->
+-----------------------------------
+psql -U postgres -c "COPY table_name FROM '/tmp/file_name.csv' DELIMITER AS ',' CSV HEADER" -d database_name
+
+
+
+
+The ability of pg_dump and psql to write to or read from pipes makes it possible to dump a database directly from one server to another; for example:
+pg_dump -h host1 dbname | psql -h host2 dbname
+
+
+
+\o => dumps the output of next command
+
+\o abc.csv => create a dump in current directory
+select * from table;
+
+
+
+
+
+Use compressed dumps. 
+----------------------------------------------
+You can use your favorite compression program, for example gzip.
+
+pg_dump dbname | gzip > filename.gz
+
+
+Reload with
+------------
+createdb dbname
+
+gunzip -c filename.gz | psql dbname
