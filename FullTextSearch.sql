@@ -223,10 +223,13 @@ WHERE to_tsvector('english',body)
 
 
 
-
-
 -- Index
 -- =========
+http://www.postgresql.org/docs/9.3/static/textsearch-indexes.html
+
+-- GiST (Generalized Search Tree)-based index.
+-- GIN (Generalized Inverted Index)-based index.
+
 /*
 	Create Index blog_indx ON blog using GIN(comment_tsvector);
 	
