@@ -1,0 +1,363 @@
+estimated_cost
+
+insert into estimated_cost values('E1','W1','SER_1','Sup1','2012-12-10');
+insert into estimated_cost values('E1','W1','SER_3','Sup3','2012-12-10');
+
+
+insert into suplier values('Sup4','DJ Daksh','Rocking');
+insert into estimated_cost values('E1','W1','SER_4','Sup4','2012-12-10');
+
+
+select * from estimated_cost;
+SELECT * FROM event_details e;
+SELECT * FROM event_master e;
+SELECT * FROM guest_detail g;
+SELECT * FROM halls h;
+SELECT * FROM master_wed m;
+SELECT * FROM personal_details p;
+SELECT * FROM personal_details p;
+SELECT * FROM place_info p;
+SELECT * FROM register r;
+SELECT * FROM service_cost s;
+SELECT * FROM service_list s;
+SELECT * FROM services s;
+SELECT * FROM suplier s;
+SELECT * FROM wedding_info w;
+
+
+
+insert into estimated_cost values('E1','W1','SER_1','2012-12-10',200,100,100);
+insert into event_booking values('E1','W1','SER_1','2012-12-10',200,100,null);
+insert into event_booking values('E1','W1','SER_3','2012-12-10',null,null,null);
+insert into event_booking values('E1','W1','SER_4','2012-12-10',null,null,null);
+insert into event_booking values('E1','W1','SER_8','2012-12-10',200,null,100);
+
+insert into event_booking values('E2','W1','SER_3','2012-12-12',null,null,null);
+insert into event_booking values('E2','W1','SER_2','2012-12-12',null,null,null);
+insert into event_booking values('E2','W1','SER_9','2012-12-12',null,null,null);
+
+insert into event_booking values('E3','W1','SER_2','2012-12-13',null,null,null);
+insert into event_booking values('E3','W1','SER_3','2012-12-13',null,null,null);
+insert into event_booking values('E3','W1','SER_4','2012-12-13',null,null,null);
+
+insert into event_booking values('E4','W1','SER_10','2012-12-20',null,null,null);
+insert into event_booking values('E4','W1','SER_2','2012-12-20',null,null,null);
+insert into event_booking values('E4','W1','SER_3','2012-12-20',null,null,null);
+insert into event_booking values('E4','W1','SER_7','2012-12-20',null,null,null);
+insert into event_booking values('E4','W1','SER_9','2012-12-20',null,null,null);
+
+
+insert into event_booking values('E9','W1','SER_1','2012-12-20',500,200,null);
+insert into event_booking values('E9','W1','SER_8','2012-12-20',500,null,300);
+insert into event_booking values('E9','W1','SER_6','2012-12-20',null,null,null);
+
+insert into event_booking values('E5','W1','SER_2','2012-12-20',null,null,null);
+insert into event_booking values('E5','W1','SER_3','2012-12-20',null,null,null);
+insert into event_booking values('E5','W1','SER_4','2012-12-20',null,null,null);
+
+insert into event_booking values('E6','W1','SER_2','2012-12-20',null,null,null);
+insert into event_booking values('E6','W1','SER_3','2012-12-20',null,null,null);
+insert into event_booking values('E6','W1','SER_4','2012-12-20',null,null,null);
+
+insert into event_booking values('E8','W1','SER_1','2012-12-20',300,150,null);
+insert into event_booking values('E8','W1','SER_2','2012-12-20',null,null,null);
+insert into event_booking values('E8','W1','SER_3','2012-12-20',null,null,null);
+insert into event_booking values('E8','W1','SER_4','2012-12-20',null,null,null);
+insert into event_booking values('E8','W1','SER_5','2012-12-20',null,null,null);
+insert into event_booking values('E8','W1','SER_6','2012-12-20',null,null,null);
+insert into event_booking values('E8','W1','SER_8','2012-12-20',300,null,150);
+insert into event_booking values('E8','W1','SER_9','2012-12-20',null,null,null);
+
+alter table event_master change event_id Event_id varchar (8) ;
+
+create table wedding_info(wedding_id varchar(8),Hall_id varchar(8),wedding_date date);
+
+create table patron_details (booking_id varchar(8),wedding_id varchar(8),events_booked varchar(100),booked_by varchar(20),contact_no int(10) unsigned,booking_date date);
+
+
+
+
+create view vegiterian_charges
+(Wedding_id,EVENT_NAME,VEGITERIAN_FOOD_CHARGES)
+as
+select e.wedding_id,em.event_name,s.charges * ( select distinct e.vegiterian) estimation
+from event_booking e join service_list s on (e.service_code=s.service_code) join event_master em on (em.Event_id=e.event_id)  where e.vegiterian is not null and e.wedding_id=(select Wedding_id from master_wed mw where mw.Wedding_id=e.wedding_id);
+
+select * from vegiterian_charges;
+
+
+
+create view non_vegiterian_charges
+(Wedding_id,EVENT_NAME,NON_VEGITERIAN_FOOD_CHARGES)
+as
+select e.wedding_id,em.event_name,s.charges * ( select distinct e.non_vegiterian) estimation
+from event_booking e join service_list s on (e.service_code=s.service_code) join event_master em on (em.Event_id=e.event_id) where e.non_vegiterian is not null and e.wedding_id=(select Wedding_id from master_wed mw where mw.Wedding_id=e.wedding_id);
+
+select * from  non_vegiterian_charges;
+
+
+create view food_charges
+(Wedding_id,EVENT_NAME,FOOD_CHARGES)
+as
+select v.wedding_id,v.event_name,v.vegiterian_food_charges+n.non_vegiterian_food_charges from vegiterian_charges v join non_vegiterian_charges n on (v.event_name=n.event_name);
+
+select * from food_charges;
+
+
+
+
+
+create view temp1
+as
+SELECT event_id,wedding_id,service_code,if(vegiterian is null,1,vegiterian) Vegiterian,if(non_vegiterian is null,1,non_vegiterian) Non_Vegiterian FROM event_booking e;
+
+
+
+
+
+all Services
+-------------
+select t.wedding_id,em.event_name,s.service_name,t.vegiterian*t.non_vegiterian*(s.charges) charges from temp1 t join service_list s on(s.service_code=t.service_code) join event_master em on (em.event_id=t.event_id) order by(em.event_name);
+
+
+
+
+create view E1_services
+as
+select t.wedding_id,em.event_name,s.service_name,t.vegiterian*t.non_vegiterian*(s.charges) charges from temp1 t join service_list s on(s.service_code=t.service_code) join event_master em on (em.event_id=t.event_id) where em.event_id='E1';
+
+create view E2_services
+as
+select t.wedding_id,em.event_name,s.service_name,t.vegiterian*t.non_vegiterian*(s.charges) charges from temp1 t join service_list s on(s.service_code=t.service_code) join event_master em on (em.event_id=t.event_id) where em.event_id='E2';
+
+create view E3_services
+as
+select t.wedding_id,em.event_name,s.service_name,t.vegiterian*t.non_vegiterian*(s.charges) charges from temp1 t join service_list s on(s.service_code=t.service_code) join event_master em on (em.event_id=t.event_id) where em.event_id='E3';
+
+create view E4_services
+as
+select t.wedding_id,em.event_name,s.service_name,t.vegiterian*t.non_vegiterian*(s.charges) charges from temp1 t join service_list s on(s.service_code=t.service_code) join event_master em on (em.event_id=t.event_id) where em.event_id='E4';
+
+create view E5_services
+as
+select t.wedding_id,em.event_name,s.service_name,t.vegiterian*t.non_vegiterian*(s.charges) charges from temp1 t join service_list s on(s.service_code=t.service_code) join event_master em on (em.event_id=t.event_id) where em.event_id='E5';
+
+create view E6_services
+as
+select t.wedding_id,em.event_name,s.service_name,t.vegiterian*t.non_vegiterian*(s.charges) charges from temp1 t join service_list s on(s.service_code=t.service_code) join event_master em on (em.event_id=t.event_id) where em.event_id='E6';
+
+
+create view E7_services
+as
+select t.wedding_id,em.event_name,s.service_name,t.vegiterian*t.non_vegiterian*(s.charges) charges from temp1 t join service_list s on(s.service_code=t.service_code) join event_master em on (em.event_id=t.event_id) where em.event_id='E7';
+
+create view E8_services
+as
+select t.wedding_id,em.event_name,s.service_name,t.vegiterian*t.non_vegiterian*(s.charges) charges from temp1 t join service_list s on(s.service_code=t.service_code) join event_master em on (em.event_id=t.event_id) where em.event_id='E8';
+
+create view E9_services
+as
+select t.wedding_id,em.event_name,s.service_name,t.vegiterian*t.non_vegiterian*(s.charges) charges from temp1 t join service_list s on(s.service_code=t.service_code) join event_master em on (em.event_id=t.event_id) where em.event_id='E9';
+
+
+
+
+
+create view E1_service_charges
+as
+select event_name,sum(charges) Total_charge from E1_services;
+
+
+create view E2_service_charges
+as
+select event_name,sum(charges) Total_charge from E2_services;
+
+create view E3_service_charges
+as
+select event_name,sum(charges) Total_charge from E3_services;
+
+create view E4_service_charges
+as
+select event_name,sum(charges) Total_charge from E4_services;
+
+create view E5_service_charges
+as
+select event_name,sum(charges) Total_charge from E5_services;
+
+create view E6_service_charges
+as
+select event_name,sum(charges) Total_charge from E6_services;
+
+create view E7_service_charges
+as
+select event_name,sum(charges) Total_charge from E7_services;
+
+create view E8_service_charges
+as
+select event_name,sum(charges) Total_charge from E8_services;
+
+create view E9_service_charges
+as
+select event_name,sum(charges) Total_charge from E9_services;
+
+
+
+create view event_charges
+as
+select event_name,Total_charge from e1_service_charges
+union
+select event_name,Total_charge from e2_service_charges
+union
+select event_name,Total_charge from e4_service_charges
+union
+select event_name,Total_charge from e5_service_charges
+union
+select event_name,Total_charge from e6_service_charges
+union
+select event_name,Total_charge from e8_service_charges
+union
+select event_name,Total_charge from e9_service_charges;
+
+
+
+create view estimated_cost
+as
+select w.wedding_id,sum(e.Total_charge)+h.charges Estimated_Cost from event_charges e join halls h join wedding_info w on(h.hall_id=w.hall_id);
+
+
+
+
+
+select s.service_name,(ifnull(e.vegiterian,1)*ifnull(e.non_vegiterian,1)*s.charges) as Chrages
+from event_booking e
+join service_list s on(s.service_code=e.service_code);
+
+
+
+
+select s.service_name,
+      case when e.event_id='E1' then (ifnull(e.vegiterian,1)*ifnull(e.non_vegiterian,1)*s.charges)
+      end as "ENGAGEMENT CEREMONY",
+      case when e.event_id='E2' then (ifnull(e.vegiterian,1)*ifnull(e.non_vegiterian,1)*s.charges)
+      end as "MEHENDI CELEBRATION",
+      case when e.event_id='E3' then (ifnull(e.vegiterian,1)*ifnull(e.non_vegiterian,1)*s.charges)
+      end as "SANGEET PARTY",
+      case when e.event_id='E4' then (ifnull(e.vegiterian,1)*ifnull(e.non_vegiterian,1)*s.charges)
+      end as "TILAK CEREMONY",
+      case when e.event_id='E5' then (ifnull(e.vegiterian,1)*ifnull(e.non_vegiterian,1)*s.charges)
+      end as "MANDAP",
+      case when e.event_id='E6' then (ifnull(e.vegiterian,1)*ifnull(e.non_vegiterian,1)*s.charges)
+      end as "VAR MALA",
+      case when e.event_id='E7' then (ifnull(e.vegiterian,1)*ifnull(e.non_vegiterian,1)*s.charges)
+      end as "VIDAAI CEREMONY",
+      case when e.event_id='E9' then (ifnull(e.vegiterian,1)*ifnull(e.non_vegiterian,1)*s.charges)
+      end as "DINNER",
+      case when e.event_id='E8' then (ifnull(e.vegiterian,1)*ifnull(e.non_vegiterian,1)*s.charges)
+      end as "RECEPTION"
+      from event_booking e
+      join service_list s on(s.service_code=e.service_code) group by(s.service_name);
+
+
+
+
+      select s.service_name,
+      case when e.event_id='E1' then (ifnull(e.vegiterian,1)*ifnull(e.non_vegiterian,1)*s.charges)
+      end as "ENGAGEMENT CEREMONY",
+      case when e.event_id='E2' then s.charges
+      end as "MEHENDI CELEBRATION",
+      case when e.event_id='E3' then s.charges
+      end as "SANGEET PARTY",
+      case when e.event_id='E4' then s.charges
+      end as "TILAK CEREMONY",
+      case when e.event_id='E5' then s.charges
+      end as "MANDAP",
+      case when e.event_id='E6' then s.charges
+      end as "VAR MALA",
+      case when e.event_id='E7' then s.charges
+      end as "VIDAAI CEREMONY",
+      case when e.event_id='E9' then (ifnull(e.vegiterian,1)*ifnull(e.non_vegiterian,1)*s.charges)
+      end as "DINNER",
+      case when e.event_id='E8' then (ifnull(e.vegiterian,1)*ifnull(e.non_vegiterian,1)*s.charges)
+      end as "RECEPTION"
+      from event_booking e
+      join service_list s on(s.service_code=e.service_code);
+
+
+
+      select
+      ifnull(s.service_name,'TOTAL'),
+      case when e.event_id='E1' then sum((ifnull(e.vegiterian,1)*ifnull(e.non_vegiterian,1)*s.charges))
+      end as "ENGAGEMENT CEREMONY",
+      case when e.event_id='E2' then s.charges
+      end as "MEHENDI CELEBRATION",
+      case when e.event_id='E3' then s.charges
+      end as "SANGEET PARTY",
+      case when e.event_id='E4' then s.charges
+      end as "TILAK CEREMONY",
+      case when e.event_id='E5' then s.charges
+      end as "MANDAP",
+      case when e.event_id='E6' then s.charges
+      end as "VAR MALA",
+      case when e.event_id='E7' then s.charges
+      end as "VIDAAI CEREMONY",
+      case when e.event_id='E9' then (ifnull(e.vegiterian,1)*ifnull(e.non_vegiterian,1)*s.charges)
+      end as "DINNER",
+      case when e.event_id='E8' then (ifnull(e.vegiterian,1)*ifnull(e.non_vegiterian,1)*s.charges)
+      end as "RECEPTION"
+      from event_booking e
+      join service_list s on(s.service_code=e.service_code) group by(s.service_name) with rollup;
+
+
+      
+      select em.event_name,
+      case when (e.event_id='E1'  and  then (ifnull(e.vegiterian,1)*ifnull(e.non_vegiterian,1)*s.charges)
+      end as "ENGAGEMENT CEREMONY"
+
+
+from event_booking e
+join service_list s on(s.service_code=e.service_code) join event_master em on(em.event_id=e.event_id);
+
+create user suername;
+
+
+
+
+select ifnull(em.event_name,'Total') as "Event Name",sum(t.vegiterian*t.non_vegiterian*(s.charges)) charges from temp t join service_list s on(s.service_code=t.service_code) join event_master em on (em.event_id=t.event_id) where em.event_id='E1'
+union
+select ifnull(em.event_name,'Total') as "Event Name",sum(t.vegiterian*t.non_vegiterian*(s.charges)) charges from temp t join service_list s on(s.service_code=t.service_code) join event_master em on (em.event_id=t.event_id) where em.event_id='E2'
+union
+select ifnull(em.event_name,'Total') as "Event Name",sum(t.vegiterian*t.non_vegiterian*(s.charges)) charges from temp t join service_list s on(s.service_code=t.service_code) join event_master em on (em.event_id=t.event_id) where em.event_id='E3'
+union
+select ifnull(em.event_name,'Total') as "Event Name",sum(t.vegiterian*t.non_vegiterian*(s.charges)) charges from temp t join service_list s on(s.service_code=t.service_code) join event_master em on (em.event_id=t.event_id) where em.event_id='E4'
+union
+select ifnull(em.event_name,'Total') as "Event Name",sum(t.vegiterian*t.non_vegiterian*(s.charges)) charges from temp t join service_list s on(s.service_code=t.service_code) join event_master em on (em.event_id=t.event_id) where em.event_id='E5'
+union
+select ifnull(em.event_name,'Total') as "Event Name",sum(t.vegiterian*t.non_vegiterian*(s.charges)) charges from temp t join service_list s on(s.service_code=t.service_code) join event_master em on (em.event_id=t.event_id) where em.event_id='E6'
+union
+select ifnull(em.event_name,'Total') as "Event Name",sum(t.vegiterian*t.non_vegiterian*(s.charges)) charges from temp t join service_list s on(s.service_code=t.service_code) join event_master em on (em.event_id=t.event_id) where em.event_id='E7'
+union
+select ifnull(em.event_name,'Total') as "Event Name",sum(t.vegiterian*t.non_vegiterian*(s.charges)) charges from temp t join service_list s on(s.service_code=t.service_code) join event_master em on (em.event_id=t.event_id) where em.event_id='E9'
+union
+select ifnull(em.event_name,'Total') as "Event Name",sum(t.vegiterian*t.non_vegiterian*(s.charges)) charges from temp t join service_list s on(s.service_code=t.service_code) join event_master em on (em.event_id=t.event_id) where em.event_id='E8' group by(em.event_name) with rollup;
+
+
+
+
+
+select ifnull(em.event_name,'Total') as "Event Name",sum(t.vegiterian*t.non_vegiterian*(s.charges)) charges from temp t join service_list s on(s.service_code=t.service_code) join event_master em on (em.event_id=t.event_id) where em.event_id='E1'
+union
+select em.event_name,sum(t.vegiterian*t.non_vegiterian*(s.charges)) charges from temp t join service_list s on(s.service_code=t.service_code) join event_master em on (em.event_id=t.event_id) where em.event_id='E2'
+union
+select em.event_name,sum(t.vegiterian*t.non_vegiterian*(s.charges)) charges from temp t join service_list s on(s.service_code=t.service_code) join event_master em on (em.event_id=t.event_id) where em.event_id='E3'
+union
+select em.event_name,sum(t.vegiterian*t.non_vegiterian*(s.charges)) charges from temp t join service_list s on(s.service_code=t.service_code) join event_master em on (em.event_id=t.event_id) where em.event_id='E4'
+union
+select em.event_name,sum(t.vegiterian*t.non_vegiterian*(s.charges)) charges from temp t join service_list s on(s.service_code=t.service_code) join event_master em on (em.event_id=t.event_id) where em.event_id='E5'
+union
+select em.event_name,sum(t.vegiterian*t.non_vegiterian*(s.charges)) charges from temp t join service_list s on(s.service_code=t.service_code) join event_master em on (em.event_id=t.event_id) where em.event_id='E6'
+union
+select em.event_name,sum(t.vegiterian*t.non_vegiterian*(s.charges)) charges from temp t join service_list s on(s.service_code=t.service_code) join event_master em on (em.event_id=t.event_id) where em.event_id='E7'
+union
+select em.event_name,sum(t.vegiterian*t.non_vegiterian*(s.charges)) charges from temp t join service_list s on(s.service_code=t.service_code) join event_master em on (em.event_id=t.event_id) where em.event_id='E9'
+union
+select ifnull(em.event_name,'Total'),sum(t.vegiterian*t.non_vegiterian*(s.charges)) charges from temp t join service_list s on(s.service_code=t.service_code) join event_master em on (em.event_id=t.event_id) where em.event_id='E8' group by(em.event_name) with rollup;

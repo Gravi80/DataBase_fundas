@@ -1,0 +1,102 @@
+Query1
+
+IDs and names of students applying to CS
+
+Query2, Query3
+
+Query1 without 'In', but with duplicates
+
+Query4
+
+Removes duplicates in Query1 and Query2 to finally arrive at same result as Query3
+
+Query5
+
+Names of students applying to CS
+
+Query6
+
+Query5 without in, but with duplicates
+
+Query7
+
+Query6 without duplicates but still incorrect result
+
+Query8
+
+GPA of CS applicants
+
+Query9, Query10
+
+Query8 without in, returning incorrect results
+
+Query11
+
+Students who applied to CS but not EE
+
+Query12
+
+Query11 using 'not sID in'
+
+Query13
+
+Colleges such that some other college is in the same state using co-related sub-query
+
+Query14
+
+Fix errors in Query13
+
+Query15
+
+Biggest college in terms of enrollments
+
+Query16
+
+student with highest GPA
+
+Query17
+
+Query 16 with GPA as well
+
+Query18
+
+studelt with highest GPA without subquery, but with duplicates
+
+Quey19
+
+removal of duplicates still gives incorrect results
+
+Query20
+
+Highest GPA using ">= all"
+
+Query21
+
+Student with higher GPA than all other students
+
+Query22
+
+College with higher enrollment than all other colleges
+
+Query23
+
+College with higher enrollment than all other colleges using 'Not <= Any'
+
+Query24
+
+Students not from the smallest highschool using 'any'
+
+Query25
+
+Students not from the smallest highschool without using any, using exists
+
+Query26
+
+Students who applied to CS but not EE using <> any gives wrong result
+
+Query27
+
+Correct way to find students who applied to CS but not EE
+
+
+

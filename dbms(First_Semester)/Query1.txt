@@ -1,0 +1,135 @@
+create view vegiterian_charges
+(Wedding_id,EVENT_NAME,VEGITERIAN_FOOD_CHARGES)
+as
+select e.wedding_id,em.event_name,s.charges * ( select distinct e.vegiterian) estimation
+from event_booking e join service_list s on (e.service_code=s.service_code) join event_master em on (em.Event_id=e.event_id)  where e.vegiterian is not null and e.wedding_id=(select Wedding_id from master_wed mw where mw.Wedding_id=e.wedding_id);
+
+select * from vegiterian_charges;
+
+
+
+create view non_vegiterian_charges
+(Wedding_id,EVENT_NAME,NON_VEGITERIAN_FOOD_CHARGES)
+as
+select e.wedding_id,em.event_name,s.charges * ( select distinct e.non_vegiterian) estimation
+from event_booking e join service_list s on (e.service_code=s.service_code) join event_master em on (em.Event_id=e.event_id) where e.non_vegiterian is not null and e.wedding_id=(select Wedding_id from master_wed mw where mw.Wedding_id=e.wedding_id);
+
+select * from  non_vegiterian_charges;
+
+
+create view food_charges
+(Wedding_id,EVENT_NAME,FOOD_CHARGES)
+as
+select v.wedding_id,v.event_name,v.vegiterian_food_charges+n.non_vegiterian_food_charges from vegiterian_charges v join non_vegiterian_charges n on (v.event_name=n.event_name);
+
+select * from food_charges;
+
+
+all Services
+-------------
+select t.wedding_id,em.event_name,s.service_name,t.vegiterian*t.non_vegiterian*(s.charges) charges from temp1 t join service_list s on(s.service_code=t.service_code) join event_master em on (em.event_id=t.event_id) order by(em.event_name);
+
+
+
+
+create view E1_services
+as
+select t.wedding_id,em.event_name,s.service_name,t.vegiterian*t.non_vegiterian*(s.charges) charges from temp1 t join service_list s on(s.service_code=t.service_code) join event_master em on (em.event_id=t.event_id) where em.event_id='E1';
+
+create view E2_services
+as
+select t.wedding_id,em.event_name,s.service_name,t.vegiterian*t.non_vegiterian*(s.charges) charges from temp1 t join service_list s on(s.service_code=t.service_code) join event_master em on (em.event_id=t.event_id) where em.event_id='E2';
+
+create view E3_services
+as
+select t.wedding_id,em.event_name,s.service_name,t.vegiterian*t.non_vegiterian*(s.charges) charges from temp1 t join service_list s on(s.service_code=t.service_code) join event_master em on (em.event_id=t.event_id) where em.event_id='E3';
+
+create view E4_services
+as
+select t.wedding_id,em.event_name,s.service_name,t.vegiterian*t.non_vegiterian*(s.charges) charges from temp1 t join service_list s on(s.service_code=t.service_code) join event_master em on (em.event_id=t.event_id) where em.event_id='E4';
+
+create view E5_services
+as
+select t.wedding_id,em.event_name,s.service_name,t.vegiterian*t.non_vegiterian*(s.charges) charges from temp1 t join service_list s on(s.service_code=t.service_code) join event_master em on (em.event_id=t.event_id) where em.event_id='E5';
+
+create view E6_services
+as
+select t.wedding_id,em.event_name,s.service_name,t.vegiterian*t.non_vegiterian*(s.charges) charges from temp1 t join service_list s on(s.service_code=t.service_code) join event_master em on (em.event_id=t.event_id) where em.event_id='E6';
+
+
+create view E7_services
+as
+select t.wedding_id,em.event_name,s.service_name,t.vegiterian*t.non_vegiterian*(s.charges) charges from temp1 t join service_list s on(s.service_code=t.service_code) join event_master em on (em.event_id=t.event_id) where em.event_id='E7';
+
+create view E8_services
+as
+select t.wedding_id,em.event_name,s.service_name,t.vegiterian*t.non_vegiterian*(s.charges) charges from temp1 t join service_list s on(s.service_code=t.service_code) join event_master em on (em.event_id=t.event_id) where em.event_id='E8';
+
+create view E9_services
+as
+select t.wedding_id,em.event_name,s.service_name,t.vegiterian*t.non_vegiterian*(s.charges) charges from temp1 t join service_list s on(s.service_code=t.service_code) join event_master em on (em.event_id=t.event_id) where em.event_id='E9';
+
+
+
+
+
+create view E1_service_charges
+as
+select event_name,sum(charges) Total_charge from E1_services;
+
+
+create view E2_service_charges
+as
+select event_name,sum(charges) Total_charge from E2_services;
+
+create view E3_service_charges
+as
+select event_name,sum(charges) Total_charge from E3_services;
+
+create view E4_service_charges
+as
+select event_name,sum(charges) Total_charge from E4_services;
+
+create view E5_service_charges
+as
+select event_name,sum(charges) Total_charge from E5_services;
+
+create view E6_service_charges
+as
+select event_name,sum(charges) Total_charge from E6_services;
+
+create view E7_service_charges
+as
+select event_name,sum(charges) Total_charge from E7_services;
+
+create view E8_service_charges
+as
+select event_name,sum(charges) Total_charge from E8_services;
+
+create view E9_service_charges
+as
+select event_name,sum(charges) Total_charge from E9_services;
+
+
+
+create view event_charges
+as
+select event_name,Total_charge from e1_service_charges
+union
+select event_name,Total_charge from e2_service_charges
+union
+select event_name,Total_charge from e4_service_charges
+union
+select event_name,Total_charge from e5_service_charges
+union
+select event_name,Total_charge from e6_service_charges
+union
+select event_name,Total_charge from e8_service_charges
+union
+select event_name,Total_charge from e9_service_charges;
+
+
+
+create view estimated_cost
+as
+select w.wedding_id,sum(e.Total_charge)+h.charges Estimated_Cost from event_charges e join halls h join wedding_info w on(h.hall_id=w.hall_id);

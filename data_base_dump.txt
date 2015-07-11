@@ -1,6 +1,9 @@
 Postgres DataBase Dump
 =======================
 
+COPY (SELECT column1,column2,column3 FROM wagers) TO '/home/path/file.csv' DELIMITER ',' CSV HEADER;
+
+
 create dump file of a database
 ------------------------------
 
