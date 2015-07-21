@@ -58,3 +58,16 @@ Reload with
 createdb dbname
 
 gunzip -c filename.gz | psql dbname
+
+
+
+
+Dump schemas into a schema file
+--------------------------------
+pg_dump --schema-only testdb
+
+
+Dump data into a data file
+---------------------------
+pg_dump --data-only testdb
+

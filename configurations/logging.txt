@@ -1,0 +1,15 @@
+Logging
+-------
+postgres has query log/text logs ( i done this query etc. not much useful)  , and transactional logs ( very imporatant )
+
+
+enable logging :
+------------------
+logging_collector = on
+chaeck logging_directory is also there
+
+
+log_min_duration_statement  => allows u to specify a value , let say u specify 200ms/2s. any query which takes more than 200ms will be recored in the logs. => once the query is completed it will get recoreded in the log files
+
+
+statement_timeout => allows u to specify a value , let say u specify 200ms/2s. any query which takes more than 200ms will be timeouted/cancelled and will be recorded in the log.

@@ -45,7 +45,7 @@ SELECT count(*) FROM users where first_name ilike '%aeb%' or last_name ilike'%ae
 	fast searching for similar strings.
 */
 
-CREATE EXTENSION IF NOT EXISTS pg_trgm;
+CREATE EXTENSION IF NOT EXISTS pg_trgm; -- Extensions are present in '/usr/share/postgresql/9.1/extension' directory.
 CREATE INDEX users_search_idx ON users USING gin (first_name gin_trgm_ops, last_name gin_trgm_ops);
 
 -- Creating this index may take a decent amount of time. 

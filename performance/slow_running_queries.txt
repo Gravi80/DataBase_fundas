@@ -1,0 +1,52 @@
+Linux Configuration
+===================
+1). turn OFF the OOM killer.
+2).use file system as ext4 or XFS ( by default it will be ext3)
+3).set two kernal parameters need to be set  , search in postgres documentation how to set
+	shared memory maximum : SHMMAX
+	shared memory All : SHMALL
+
+
+
+
+you can use pgbench utility to insert sample data.
+
+I am runnign something in the background on these tables and v gona check how the things works
+
+There is some query runnig slower in ur environment n, u have 2 figure out which is that query and from which terminal/application it has been fired
+
+
+one of the easiest way to do that is to use "pg_stat_activity" table
+
+\dS+ pg_stat_activity
+
+ datid      			=> oid of that database where this query is running
+ datname    			=>  this particular session is related to which database   
+ pid        			=> OS process which is running for that particular query   
+ usesysid  			    =>  
+ usename  			    =>    
+ application_name 		=>
+ client_addr  			=>  from where the query has been fired  
+ client_hostname 		=>  
+ client_port   			=>   
+ 
+ backend_start   		=> when your connection started
+ xact_start     		=> what was the time when ur transaction started, the moment u say begin transaction there will be timestamp marked for this column
+ query_start     		=> there is a query running , and the time it sarted
+ state_change     		=>
+ 
+ waiting          		=> this gives us information, if ur query is waiting for certain locks
+ state       			=> if ur query is curently running or ur transaction is in idle state u will see that here
+
+
+Will list all the things running on my database
+===============================================
+Ravi=#	select * from pg_stat_activity ;
+
+
+select datname,application_name,current_timestamp-query_start,query_start,query from pg_stat_activity where state!='idle';
+
+gives u slowest 5 running queries
+==================================
+select * from (select datname,application_name,current_timestamp-query_start "duration",query_start,query from pg_stat_activity where state='active')a order by "duration" desc limit 5; 
+

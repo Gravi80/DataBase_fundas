@@ -1,3 +1,5 @@
+-- cd pg_log
+
 -- Get Postgres Version
 select version();
 
@@ -6,6 +8,7 @@ SHOW config_file;
 
 -- Get postgres location
 select name, setting from pg_settings where name = 'data_directory';
+-- cd $PGDATA
 
 --Restart Postgres In Mac
 
