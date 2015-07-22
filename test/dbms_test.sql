@@ -31,7 +31,7 @@ insert into department values('I22','BRANCH OFFICE I2');
 insert into department values('I22','BRANCH OFFICE I2');	
 
 
-Q1). Write a Query to delete duplicate rows in the “department” table.
+-- Q1). Write a Query to delete duplicate rows in the “department” table.
 
 WITH RowNumbers AS
 (
@@ -48,38 +48,39 @@ delete from ( SELECT dept_no,ROW_NUMBER() OVER (PARTITION BY  dept_no) AS rn FRO
 
 
 
-Q2). Write a Query to get the employee details from “employee” table who joined before January 1st 1970.
+-- Q2). Write a Query to get the employee details from “employee” table who joined before January 1st 1970.
 select * from (select salary,rank() over(order by salary desc) from employee where salary IS NOT NULL)emp where rank=4;
 
 
-Q3).Write a Query to get the employee details from “employee” table who joined before January 1st 1970.
+-- Q3).Write a Query to get the employee details from “employee” table who joined before January 1st 1970.
 explain analyze select * from employee where hire_date > to_date('01 jan 1970','DD Mon YYYY');
 explain analyze select * from employee where hire_date > '01 jan 1970';
 
 
-Q4).Write a Query to get names of employees from employee table who have '%' in their names.
+-- Q4).Write a Query to get names of employees from employee table who have '%' in their names.
 select emp_name from employee where position('%' in emp_name) > 0;
 
-Q5).Write a Query to select the first 3 characters of Emp_Name from “employee”.
+-- Q5).Write a Query to select the first 3 characters of Emp_Name from “employee”.
 select substr(emp_name,1,3) as name from employee;
 
-Q6). Write a Query to get Emp_Name from employee table after removing white spaces from beginning and end.
+-- Q6). Write a Query to get Emp_Name from employee table after removing white spaces from beginning and end.
 select trim(both ' ' from emp_name)as emp_name from employee ;
 
-Q7).Write a Query to get the employee details from “employee” table for employees who have joined in the year “1980”.
+-- Q7).Write a Query to get the employee details from “employee” table for employees who have joined in the year “1980”.
 select emp_name from employee where date_part('year',hire_date)=1980;
 select emp_name from employee where extract('year'from hire_date)=1980;
 
-Q8).Write a Query to get department (name) wise average salary from “employee” table and order the result by ascending order of salaries.
+-- Q8).Write a Query to get department (name) wise average salary from “employee” table and order the result by ascending order of salaries.
 select d.dept_no,d.dept_name,avg(e.salary) from employee e join department d on e.dept_no=d.dept_no group by d.dept_name,d.dept_no;
 
-Q9).Write a Query to display the Count of the number of employees by department (id).
+-- Q9).Write a Query to display the Count of the number of employees by department (id).
 select dept_no,count(1) from employee group by dept_no;
 
-Q10). Write a Query to find the 4th maximum salary in the “employee” table.
+-- Q10). Write a Query to find the 4th maximum salary in the “employee” table.
 select emp_name from (select emp_name,salary,rank() over (order by coalesce(salary,0) desc) from employee)salary_rank where rank=4;
 
-Q11)Write a Query to List Dept_No and Dept_Names for all “Department” s in which there are no “Employee”s. Write the query using OUTER JOIN (LEFT/RIGHT).
+-- Q11)Write a Query to List Dept_No and Dept_Names for all “Department” s in which there are no “Employee”s. Write the query using OUTER JOIN (LEFT/RIGHT).
+
 
 
 
