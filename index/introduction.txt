@@ -1,0 +1,43 @@
+Indexes in Postgres do not hold all row data. 
+Even when an index is used in a query and matching rows where found, Postgres will go to disk to fetch the row data.
+
+An index must be selective enough to reduce the number of disk lookups for it to be worth it. 
+For example, a primary key lookup with a big enough table makes good use of an index: instead of sequentially scanning the table matching the query conditions, Postgres is able to find the targeted rows in an index, and then fetch them from disk selectively. 
+
+
+Indexes are not free: they come at a cost in terms of storage and maintenance.
+
+
+Whether an index is used or not depends on a number of factors, including the Postgres server configuration, the data in the table, the index and the query. 
+For instance, trying to make a query use an index on your development machine with a small subset of “test data” will be frustrating: Postgres will determine that the dataset is so small that it’s not worth the overhead of reading through the index and then fetching the data from disk. Random I/O is much slower than sequential, so the cost of a sequential scan is lower than that of the random I/O introduced by reading the index and selectively finding the data on disk.
+
+
+
+When you are ready to apply an index on your production database, keep in mind that creating an index locks the table against writes. For big tables that can mean your site is down for hours. Fortunately Postgres allows you to CREATE INDEX CONCURRENTLY, which will take much longer to build, but does not require a lock that blocks writes. Ordinary CREATE INDEX commands require a lock that blocks writes but not reads.
+
+
+
+Finally, indexes will become fragmented and unoptimized after some time, especially if the rows in the table are often updated or deleted. In those cases it may be required to perform a REINDEX leaving you with a balanced and optimized index. However be cautious about reindexing big indexes as write locks are obtained on the parent table. One strategy to achieve the same result on a live site is to build an index concurrently on the same table and columns but with a different name, and then dropping the original index and renaming the new one. This procedure, while much longer, won’t require any long running locks on the live tables.
+
+
+
+PostgreSQL's Index-Only Scan only works on vacuumed tables.
+
+ If you don't vacuum, even the Index Only Scan operation must visit the heap to check if the row is visible. This is just a limitation how PostgreSQL implements Indexes (without visibility information) and how they made Index Only Scans working nevertheless—if vacuumed ;)
+
+
+
+ 
+
+ Wanna see the statistic that makes all the difference?
+
+select *
+ from pg_statistic
+ join pg_class on (     pg_statistic.starelid = pg_class.oid
+                    and pg_statistic.staattnum=1 -- should come from pg_attribute, lazy me
+                  )
+ where relname='phone_on_ac';
+
+
+
+

@@ -35,7 +35,7 @@ EXPLAIN SELECT sName FROm Student;
  Seq Scan on student  (cost=0.00..102049.29 rows=6291129 width=5)
 
 
-cost 0.00 => startup time, how long it takes to start that process 
+cost 0.00 => startup time, how long it takes to start that process , derived from the cost parameters in postgresql.conf
 
 102049.29 => max time , how much time it thinks it is going to take
 
@@ -77,6 +77,11 @@ EXPLAIN(ANALYZE TRUE, TIMING FALSE) SELECT sName FROm Student where sName='Gary'
    Rows Removed by Filter: 5767168
  Total runtime: 670.702 ms
 
+*/
+
+/*
+  If there is a huge diffrence between estimated  and actual cost, then probably your statistics updation 
+  is not happening properly.
 */
 
 

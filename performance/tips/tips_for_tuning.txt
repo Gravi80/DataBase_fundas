@@ -1,0 +1,80 @@
+1). Tune the query, remove costly cluases
+
+2). create required indexs
+
+3). Feed the optimizer with correct info- Tune the optimizer parameters if required
+	e.g: seq_page_cost, random_page_cost, effective_chache_size etc
+
+4). Provision more resources for hungary(costly) queries
+	Set some session/transaction/user level parameters for certain costly queries.
+	e.g : work_mem => used for sorting
+
+5). Consider other changes
+	e.g : application architecture, application logic, hardware upgrade
+
+
+
+Tip 1
+=====
+1). Select only what you need.
+	Everyone wants to use "Select *" but no one needs it, the query becomes slower.
+	Happend Bcz of the Network I/O and the Disk I/O that postgresql has to do.
+
+
+Tip 2
+=====
+	Neither you need all the rows in one go nor your application can handle them all.
+	Avoid filtering in aplication.
+	Fetch only what you need - use WHERE clause.
+	Limit huge recordsets - use LIMIT clause
+	Iterate using OFFSET clause
+
+
+Tip 3
+=====
+	1).Avoid Sorting if you actually don't need it.
+	2).ORDER BY clauses uses sorting memory and postgresql tries to allocate that from work_mem, but
+	   If work_mem is not enough, to accomodate all the dataset which need to be sorted ,
+	   it spills over to disk.
+	   When sorting goes to disk there is I/O invloved which slowes down ur query.
+	   You can overcome this by setting work_mem to a high value.
+
+	   In tip3 image, the sorting method is quick sort and it has accomodated everything within memory,
+	   nothing has gone to disk.
+
+
+Tip 4
+=====
+	Shift the Calculation from RHS to LHS
+	Instead of using expressions on columns use the inverse with laterals.
+
+	In tip4 image, 
+	1). we want to check all those people whose salary would become $1200 if
+		i add 200$ to there salary.
+	2). I want to see which are those employees who are hired on a particular date,
+		and my hire_date is a timestamp column.
+		In that case, we would truncate the date_time part of that coulumn and comapre it
+		to the date
+
+	The postgres would not use index for red colored queries.
+	Apply basic high School mathematics.	
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

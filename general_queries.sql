@@ -6,6 +6,9 @@ select version();
 -- Get Postgres Config Location
 SHOW config_file;
 
+select name,min_val, max_val, boot_val from pg_settings;
+
+
 -- Get postgres location
 select name, setting from pg_settings where name = 'data_directory';
 -- cd $PGDATA
@@ -107,3 +110,6 @@ create user foo unencrypted password 'foopassword';
 create user bar encrypted password 'foopassword';
 select usename,passwd from pg_shadow where usename in ('postgres','foo','bar');
 
+
+-- Bulk update
+update online_attributes set user_id = c.user_id from (values(3946, 1),(3947, 2)) as c(player_id, user_id) where c.player_id = online_attributes.person_id;

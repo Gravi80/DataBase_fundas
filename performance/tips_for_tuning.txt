@@ -1,0 +1,14 @@
+1). Tune the query, remove costly cluases
+
+2). create required indexs
+
+3). Feed the optimizer with correct info- Tune the optimizer parameters if required
+	e.g: seq_page_cost, random_page_cost, effective_chache_size etc
+
+4). Provision more resources for hungary(costly) queries
+	Set some session/transaction/user level parameters for certain costly queries.
+	e.g : work_mem => used for sorting
+
+5). Consider other changes
+	e.g : application architecture, application logic, hardware upgrade
+

@@ -48,7 +48,7 @@ delete from ( SELECT dept_no,ROW_NUMBER() OVER (PARTITION BY  dept_no) AS rn FRO
 
 
 
--- Q2). Write a Query to get the employee details from “employee” table who joined before January 1st 1970.
+-- Q2). Select employee having 4th highest salary.
 select * from (select salary,rank() over(order by salary desc) from employee where salary IS NOT NULL)emp where rank=4;
 
 
@@ -79,8 +79,39 @@ select dept_no,count(1) from employee group by dept_no;
 -- Q10). Write a Query to find the 4th maximum salary in the “employee” table.
 select emp_name from (select emp_name,salary,rank() over (order by coalesce(salary,0) desc) from employee)salary_rank where rank=4;
 
--- Q11)Write a Query to List Dept_No and Dept_Names for all “Department” s in which there are no “Employee”s. Write the query using OUTER JOIN (LEFT/RIGHT).
+-- Q11)Write a Query to List Dept_No and Dept_Names for all “Department” s in which there are no “Employee”s. 
+-- 	   Write the query using OUTER JOIN (LEFT/RIGHT).
 
+select d.dept_no,d.dept_name from department d LEFT JOIN employee e ON d.dept_no=e.dept_no where e.dept_no is null; 
+
+-- Q13) Select TOP 3 salaries from “employee” table using window functions
+select * from (select salary,rank() over(order by salary desc) from employee where salary IS NOT NULL)emp where rank<4;
+
+-- Q14) Select employee details from “employee” table if data exists for them in “Department” table.
+select * from pgbench_tellers t1 where exists (select 1 from pgbench_brances br where br.bid=t1.bid
+	and bbalance=1000);
+
+
+-- Q15) Write a Query to display Emp_Name, salary and New_salary for all the employees.  
+-- 		The New_salary should be computed based on the below rules.
+ -- a) If salary is less than 20000 then increment the salary by 20%
+ -- b) If salary is between 20001 and 40000 then increment the salary by 10%
+ -- c) If salary is greater than 40001 then increment the salary by 5%
+
+
+
+-- Q16) Write a query to rank employees based on their commission. The ranks should be consecutive.
+
+
+
+-- Q17) Write syntax to set 2 fields (Emp_No, Emp_Name) as primary key in “employee” table.
+
+
+-- Q18) Write the command to create Sequence with name SEQ1 which is starting from 100.  
+-- 		The sequence should be increase by 1.
+
+
+-- Q19) Write a recursive query to list Emp_No, Emp_Name, Mgr_No and Mgr_Name from Employees table.
 
 
 

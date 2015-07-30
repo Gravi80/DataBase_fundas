@@ -1,0 +1,1 @@
+update online_attributes set user_id = c.user_id from (values(3946, 1),(3947, 2)) as c(player_id, user_id) where c.player_id = online_attributes.player_id;
