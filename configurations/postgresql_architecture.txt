@@ -1,0 +1,38 @@
+refer Image -> postgresql_architecture
+
+There is a postmaster process which is like init process of linux.
+This process owns all the other user and 
+utility processes like : Auto vacuum, Stats collector, Check Pointer, WAL writer, Log writer.
+
+as well as the connections which are made to the postgresql.
+
+
+In the Memory Component there is a shared memory defined for postmaster process, in this shared memory you have 
+
+Shared Buffers
+===============
+Shared Buffer -> stores the cache pages from tables and indexes.
+The data is read from data files into File System cache and then put inside shared buffer.
+
+
+WAL Buffers
+=============
+There is a memory segment called WAL Buffers which caches the WAL records, as soon as you commit your transaction , these wall buffers are flushed to the File Sysytem cache and then flushed to WAL files on the disk.
+
+
+
+work_mem
+=========
+There are temporary files which are used for sorting and in addition to having temporary files to speed up the sort process there is a sorting space in the memory which is called work memory.
+
+
+maintainence_work_mem
+=======================
+There is separate segment used for maintainence work ( Like: Indexig , creation of FKs ).
+This area is called maintainence memotry or maintainence work memory.
+
+
+
+
+How things work is data is cached into shared buffer and then data is returned to user from shared Buffers.
+
