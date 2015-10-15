@@ -63,6 +63,26 @@ Tip 4
 
 
 
+Tip 5
+======
+	Specify FILLFACTOR when creating tables and indexes.
+
+FILLFACTOR is a DDL parameter in create table and create index commands that leaves empty space on table and index pages for subsequent updates or inserts to maintain clustering order.
+For tables, it must be explicitly set (common value: 90%), otherwise it defaults to 100% fillfactor. For B-tree indexes it defaults to 90% but it is good to still specify it to keep its purpose fresh in our minds.
+
+
+Tip 6
+======
+	Regularly remove database bloat
+Database bloat refers to dead tuples, i.e., dead rows. Rows become dead when they are deleted and somtimes when they are modified, but not in place.
+
+Use CLUSTER or VACUUM FULL, which forces rows to be sorted again based on primary key, leaving only index fill factor as empty space between pages, and all other free space is put at the end. 
+Problem with CLUSTER and VACUUM FULL is that it does a full table lock.	
+
+pg_reorg can re-organize tables on a postgres database without any locks so that you can retrieve or update rows in tables being reorganized. To just mark dead tuples as available again, auto-vacuum does this. Vacuuming updates statistics and marks dead tuples as available again, whereas CLUSTER makes a new table with small free space at end of each segment and rest of free space is at the end. This module is a better alternative of CLUSTER and VACUUM FULL.
+
+
+
 
 
 

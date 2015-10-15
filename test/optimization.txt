@@ -1,0 +1,22 @@
+=> Try to avoid nested loops
+=> Driving table should be table which is having low number of rows.
+=> Try to do filter condition before joins.
+
+Select * from emp INNER JOIN Dept
+ON Emp.dept_no = Dept.dept_no
+Where emp.name = ‘A’;
+
+In above Emp.dept_no and Dept.dept_no , columns should be indexed.
+But emp.name = ‘A’ -> will gives you Less Result.
+
+
+You can write above as 
+---------------------------
+Select * from (select * from Emp Where Name=‘A’) a INNER JOIN Dept
+ON a.dept_no =  Dept.dept_no;
+
+
+
+This will perform Better
+---------------------------
+Select * from Emp,Dept where Dept.dept_no=Emp.dept_no;

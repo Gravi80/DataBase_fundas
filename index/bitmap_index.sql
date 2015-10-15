@@ -24,13 +24,20 @@ as lossy and no rechecking is done.
 */
 
 
-/* As Postgres scans an index and finds a matching key, it can choose not to read the matching row from the table right away. Instead, it can remember on which page was that matching row, finish scanning the index, and read each data page with matching rows only once. As a result, Postgres expects to make less page reads.
+/* 
 
 
 
+The Bitmap Index+Heap Scan operations are an optimization of the regular Index Scan: 
+Instead of accessing the Heap right after fetching a row from the index, the Bitmap Index Scan completes the 
+index lookup first, keeping track of all rows that might be interesting (in a, you guess it, bitmap). 
 
-
-The Bitmap Index+Heap Scan operations are an optimization of the regular Index Scan: Instead of accessing the Heap right after fetching a row from the index, the Bitmap Index Scan completes the index lookup first, keeping track of all rows that might be interesting (in a, you guess it, bitmap). The Bitmap Heap Scan than accesses all the interesting heap pages sequentially. For that, it first sorts the bitmap. The aim is to reduce the random IO by using a little memory and CPU for the bitmap. The Bitmap Index+Heap Scan's make only sense if you access many rows. Further the Bitmap itself makes only sense if you intend to fetch data from the heap. Consequently, the Bitmap operations are not the right tool to implement index-only scans. Only the Index Only Scan operation actually implements index-only scans.
+The Bitmap Heap Scan than accesses all the interesting heap pages sequentially. For that, it first sorts the bitmap. 
+he aim is to reduce the random IO by using a little memory and CPU for the bitmap. 
+The Bitmap Index+Heap Scan's make only sense if you access many rows. 
+Further the Bitmap itself makes only sense if you intend to fetch data from the heap. 
+Consequently, the Bitmap operations are not the right tool to implement index-only scans. 
+Only the Index Only Scan operation actually implements index-only scans.
 
 
 

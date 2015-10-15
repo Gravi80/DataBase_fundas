@@ -1,0 +1,23 @@
+when you run any SQL ->
+checks
+
+1). Syntax
+2). Semantics + authorization  => whether i am properly following the semantics of language   
+3). Expanding the Query  =>  * will become  id,name,salary    
+4). Find The Execution Plan (with index,without index) (generate shortest-path algorithm)
+5).	Choose the best execution plans
+6). Execute + Check Constraints 
+7). Fetch Results
+
+    These steps are called Parsing Algorithm.
+    and This is called as Hard Parse.
+
+
+
+After execution of query for first time
+Query and Best Execution Plan will be cached in db_buffer . So, next time it will just find in the memory that the Query exists and find the best execution plan of query present in the the buffer and execute the query.
+
+
+This is called Soft Parse.  
+  
+﻿

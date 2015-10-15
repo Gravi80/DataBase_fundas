@@ -1,0 +1,5 @@
+The Commit Log(Clog) is what postgres uses to track whether a transaction is commited or rollback or still in-progress.
+
+MultiTransactions(multiXacts) stores information about row-level locks, updates and deletes when multiple transactions are involved.
+
+Vaccum is responsible for removing unnecessary data from CLOG and multiXacts.

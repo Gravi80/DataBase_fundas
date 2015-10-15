@@ -1,0 +1,28 @@
+A Freeze vacuum must scan and clean every single page so when vacuum is freezing if it can't acquire the CleanUp lock it will sit and wait and that can cuase other problems.
+Because it is sitting for the cleanup lock any body else who want to access that page then have to wait and sit behind the vacuum.
+
+This is changed in 9.1/9.2
+So if a vaccum couldn't acquire a cleanup lock it would not sit there.
+
+
+
+Transactions Ids(XIDs) and Multi Transaction Ids(MXIDs) , the way those are implemented is it's basically a circular counter.
+starts at 2 and starts increasing and when it hits 2^31 , all the sudden 2 is no longer a transaction in the past and becomes the transaction in the future.
+So, the problem is if you have rows which says oh i was created by transaction no. 2 and all of sudden you get to transaction 2^31+2 now that will become invisible bcz now the database is thinkig
+Ohh this row is actually created by a transaction which is in future and it won't show it to you.
+
+So, the way the system works around this/ handle this is as the transaction count increases eventually it has to go through and find all transaction Ids in all tables that are older and replace them with the special value that indicates that this row is visible to every body untill someone deletes it.
+
+This Process is Known as freezing and has to be done both for XIDd and MXIDs.
+
+
+If you don't handle Freezing correctly eventually the database will stop allowing you to create new transaction.
+
+
+If You have very Extremely high rates of update transactions, you do lot of FOR SHARE LOCK bcz it will always generate a Multi Transaction Ids , or lot of concurrent FK checks happening you can run into problems of been able to freeze ur data.
+
+
+to see the counter -> for transaction there is function get_current_snapshot() which will show u ur current XIDs.
+
+txid.current
+dat_frozen_xid -> tells you oldest non frozen transaction ID in each database.

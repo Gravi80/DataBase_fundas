@@ -1,0 +1,7 @@
+In dataBases you have two choices to ensure you have consitent data :
+1). You can do locking (sucks)
+2). You can use Multi Version Concurrency Control, meaning when u do a delete or update the old data does not 	  get removed.
+	When you do a update new copy of row is created and when u do a delete it is left behind.
+
+postgres uses the second option.
+Eventually these old dead tuples must be removed.	

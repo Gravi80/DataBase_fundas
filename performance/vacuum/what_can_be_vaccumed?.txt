@@ -1,0 +1,14 @@
+You do an update or delete you are creating these dead rows, but the big questions becomes when you have a dead row when can you actually remove that.
+
+Basically the constraint there is that when you start a transaction or select statement.
+In postgres the database gets help of the snapshot and that snapshot has visibilty information that determins what rows that statement can actually see.
+So, if u have a snapshot in ur database taken an hour ago and since that snapshot have deleted 4 millions rows those rows can't be cleaned up by vaccum bcz that hour old select statement could still need to look at that data.
+
+i.e Vacuum can only removes rows that no currently running transaction could see.
+
+
+
+Because of how Index Scan and Sequential scan operates you cannot vacuum a page of data while somebody else is looking at that page.
+LockBufferForCleanup()
+In 9.5 -> vaccum rohbust logging
+

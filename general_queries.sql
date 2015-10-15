@@ -22,6 +22,9 @@ $pg_ctl restart -D /usr/local/var/postgres --Location which you got from above q
 $pg_ctl -D /usr/local/var/postgres -l /usr/local/var/postgres/server.log start
 
 
+-- Reload config without restarting database
+SELECT pg_reload_conf();
+
 
 -- Get number of rows of all tables in a database
 
@@ -113,3 +116,20 @@ select usename,passwd from pg_shadow where usename in ('postgres','foo','bar');
 
 -- Bulk update
 update online_attributes set user_id = c.user_id from (values(3946, 1),(3947, 2)) as c(player_id, user_id) where c.player_id = online_attributes.person_id;
+
+
+
+
+select relname, last_vacuum, last_analyze from pg_stat_all_tables where schemaname = 'public';
+
+\d pg_stats
+
+SELECT * FROM pg_stats WHERE tablename = 'products' AND attname = 'selection_type';
+
+
+EXPLAIN (FORMAT JSON) SELECT * FROM users;
+
+Here is the same plan with costs suppressed:
+EXPLAIN (COSTS FALSE) SELECT * FROM foo WHERE i = 4;
+
+
