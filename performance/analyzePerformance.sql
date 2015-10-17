@@ -1,3 +1,12 @@
+/*
+
+Paste the output of explain analyze [some query] into explain.depesz.com(http://explain.depesz.com/)
+to help identify the most costly nodes in the query plans.
+
+*/
+
+
+
  -- 	\timing   => will display timing after each query at client side
 
 

@@ -1,3 +1,20 @@
+/*
+
+VACUUM FULL ANALYZE is recommended for tables that have just went through a bulk delete or update. 
+Do note that when you run VACUUM FULL, the affected tables will be locked until the process is done and 
+extra storage space is required as a temp store. 
+
+Normal VACUUM do not lock the tables, but does has its overheads while running along side a live database.
+
+*/
+
+-- The easiest way is to monitor , how many aautovacuum workers are running:
+-- Postgres 9.2 +
+SELECT * FROM pg_stat_activity WHERE query LIKE 'autovacuum:%'; 
+-- Older versions
+SELECT * FROM pg_stat_activity WHERE current_query LIKE 'autovacuum:%';
+
+
 -- Make sure your largest database tables are vacuumed and analyzed frequently by setting stricter table-level 
 -- auto-vacuum settings. 
 
@@ -32,8 +49,18 @@ ALTER TABLE table_name SET (autovacuum_analyze_threshold = 5000);
 
 
 VACUUM ANALYZE table_name;
+VACUUM VERBOSE ANALYZE table_name;
 
 -- You can check the last time your tables were vacuumed and analyzed with the query below. 
+select relname,last_vacuum, last_autovacuum, last_analyze, last_autoanalyze from pg_stat_user_tables;
+
+/*
+ Grep Postgres Log
+ =================
+ grep autovacuum /var/postgresql/log
+
+*/
+
 -- In our case, we had tables that hadn’t been cleaned up in weeks.
 
 
@@ -41,8 +68,8 @@ VACUUM ANALYZE table_name;
 -- we made the default auto-vacuum settings stricter. 
 -- Postgres runs a daemon to regularly vacuum and analyze itself. 
 -- Tables are auto-vacuumed when 20% of the rows plus 50 rows are inserted, updated or deleted, 
--- and auto-analyzed similarly at 10%, and 50 row thresholds. T
--- hese settings work fine for smaller tables, but as a table grows to have millions of rows, there can be tens of 
+-- and auto-analyzed similarly at 10%, and 50 row thresholds.
+-- These settings work fine for smaller tables, but as a table grows to have millions of rows, there can be tens of 
 -- thousands of inserts or updates before the table is vacuumed and analyzed.
 
 
@@ -68,5 +95,41 @@ SET (autovacuum_vacuum_threshold = 5000);
 -- Similarly, the threshold to auto-analyze is calculated by:
 -- analyze threshold = autovacuum_vacuum_threshold + autovacuum_vacuum_scale_factor * number of rows in table
 
+-- Just to see which tables qualify for autovacuum at all, the following query may be used
+SELECT psut.relname,
+     to_char(psut.last_vacuum, 'YYYY-MM-DD HH24:MI') as last_vacuum,
+     to_char(psut.last_autovacuum, 'YYYY-MM-DD HH24:MI') as last_autovacuum,
+     to_char(pg_class.reltuples, '9G999G999G999') AS live_tup,
+     to_char(psut.n_dead_tup, '9G999G999G999') AS dead_tup,
+     to_char(CAST(current_setting('autovacuum_vacuum_threshold') AS bigint)
+         + (CAST(current_setting('autovacuum_vacuum_scale_factor') AS numeric)
+            * pg_class.reltuples), '9G999G999G999') AS av_threshold,
+     CASE
+         WHEN CAST(current_setting('autovacuum_vacuum_threshold') AS bigint)
+             + (CAST(current_setting('autovacuum_vacuum_scale_factor') AS numeric)
+                * pg_class.reltuples) < psut.n_dead_tup
+         THEN '*'
+         ELSE ''
+     END AS expect_av
+ FROM pg_stat_user_tables psut
+     JOIN pg_class on psut.relid = pg_class.oid
+ ORDER BY 1;
 
+
+
+
+ --  Identifying the critical tables for manually vacuum
+ -- When you run the query once a day
+
+select datname, age(datfrozenxid) from pg_database;
+
+-- If you find the datfrozenxid is increasing then it means the auto vacuuming process is lagging behind. 
+-- This will cause a transaction xid wrap around soon and will result in force shut down of the postgres.
+
+
+
+/*
+If you have a lot of random UPDATES, you may want to set the FILLFACTOR to something lower than 100, 
+so that HOT updates have a chance to partially remove the need to vacuum altogether. 
+*/
 

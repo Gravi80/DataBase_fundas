@@ -1,0 +1,144 @@
+
+run a command from terminal
+===========================
+
+psql -d Ravi -c 'select * from Persons;' -F, -A -t
+
+
+it gives you output in csv format
+
+
+
+Shortcuts
+=========
+\?					=>  help with psql commands
+\d  				=>	listing all relations  
+\dt					=>	list only all tables
+\dn			    	=> list all schemas 
+\d relation_name	=>	Describe a specific relation
+\x auto				=>	formatting output
+\o file_name		=>	want to open your results in your editor or a spreadsheet for further analysis,
+						\o data redirect all output to the file ./file_name, where "." is present working directory.
+						Note that data might also be a script that accepts query results on standard input.
+
+\l+					=> shows database size
+\d+					=> Show table sizes
+\dti+				=> shows both tables and indexes size
+
+
+for CSV generation
+==================
+after "\o filename" do
+
+\f ','			=>	set the field separator to ,
+\a 				=>	switch to unaligned output mode 
+\t 				=>	show tuples but no headers or footers
+
+
+Declare Variables
+=================
+
+\set t my_long_table_name
+select count(*) from :t;
+
+
+
+Pagination of output
+====================
+
+\pset pager off 	=>	disable pagination 
+
+
+psql will page through the query results using $PAGER, usually defaulting to more,If you prefer less use
+
+
+\setenv PAGER less
+
+
+
+Change Table Styles
+===================
+
+
+\pset format wrapped		=> to prevent your columns from running wider than
+								your screen.
+
+\pset border 0				=> turn off borders
+\pset border 2				=> add more borders
+
+\pset linestyle 	unicode    => use unicode characters to draw borders
+
+
+
+Changing the PROMPT1
+====================
+There are a lot of options for changing the prompt. You can add colors, domain names, the name of the current database, and more.
+
+
+\set PROMPT1 '%[%033[1m%]%M %n@%/%R%[%033[0m%]%#'
+
+%[..%]					=>	 default prompt color to a bold black.
+%M 						=>	 host name
+%n  					=> 	 database user name
+%/						=>	 database name
+%R 						=>   normally =, but ^ if in single-line mode, and ! 							if the session is disconnected from the database
+%[...%]					=> resets the color to non-bold black
+%#						=> # if you’re a superuser, otherwise >
+
+
+
+Changing the PROMPT2
+=====================
+PROMPT2 is used when psql is waiting for more input, like when you type SELECT * FROM then hit enter - you haven’t typed a semicolon, so psql patiently displays PROMPT2 and waits.
+
+
+\set PROMPT2 '[more] %R > '
+
+
+[more] 					=> is the literal string [more].
+%R 						=> 
+
+
+
+
+~/.psqlrc
+==========
+
+-- By default, NULL displays as an empty space. Is it actually an empty
+-- string, or is it null? This makes that distinction visible.
+
+\pset null '[NULL]'
+
+-- Use table format (with headers across the top) by default, but switch to
+-- expanded table format when there's a lot of data, which makes it much
+-- easier to read.
+
+\x auto
+
+-- Verbose error reports.
+
+\set VERBOSITY verbose
+
+-- Use a separate history file per-database.
+
+\set HISTFILE ~/.psql_history- :DBNAME
+
+-- If a command is run more than once in a row, only store it once in the
+-- history.
+
+\set HISTCONTROL ignoredups
+
+-- Autocomplete keywords (like SELECT) in upper-case, even if you started
+-- typing them in lower case.
+
+\set COMP_KEYWORD_CASE upper
+
+\set PROMPT1 '%[%033[1m%]%M %n@%/%R%[%033[0m%]%#'
+
+\set PROMPT2 '[more] %R > '
+
+\pset border 2
+
+\pset format wrapped
+
+\pset linestyle unicode

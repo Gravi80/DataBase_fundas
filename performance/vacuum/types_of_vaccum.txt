@@ -1,0 +1,78 @@
+There are 4 major variations on vacuuming
+
+1).autovacuum 
+is a built-in process that attempts to automatically 
+vacuum anything thata needs it.
+
+2).VACUUM FULL
+completely rebuilds a table from scratch.
+
+3).VACUUM
+is a regular, manualy run vacuum.
+
+4).VACUUM FREEZE 
+is manual vacuum that forcibly freezes everything it can.
+
+
+
+autovacuum
+-----------
+Generally doesn't need to be tweaked in 9.4, the default setting 
+are pretty good.
+
+If u are running an older version, the one thing that you would probably
+want to change is , originaly the autovacuum used a threshold  of the percentage of table
+that had the change that was set to like 40%,
+So, autovacuum wouldn't try to vacuum the table untill there is atleast 40% churn.
+
+
+vacuum your table after every minute.
+Bcz the idea there is if the table is small, vacuum is very inexpensive and by vacuuming
+that aggresively you are trying to keep it small
+
+
+If you do have slow periods(i.e weekend) on a table it can help to run regular vacuum
+via cron to vacuum that table.
+
+
+frequent manual VACUUM of heavily updated tables is still a good 
+idea
+
+
+VACUUM FULL
+===========
+ prior to 9.0 , running a VACUUM FULL was a horrible idea, the way it worked is it tooked the last tuple in the table and tried to move it to the front, and then second to last and triend to movein to the first.
+
+ and it holds an exclusive lock on the table, so now no body can do anything on the table.
+The other bigger problem was in that process of doing it was bloting the Index, bcz each of these tuple that got moved then had to create an index entries and especially with a way a B-tree works.
+So that can damage your indexes.
+
+
+So since 9.0 , postgres build a brand new copy of the table from scratch and recreates all the indexe on it, similar to cluster.
+It also takes an exclusive lock on table.(No Insert/Select)
+
+
+github => pg_repack
+
+
+VACUUM (manual vacuum)
+=======
+
+1). cannot be run in a transaction (or function)
+
+2). there is a vacuumdb commend to run from shell script
+
+What Vacuum actualy does is
+For Each Table
+a). scans the heap, remembering all the tuples that need to be removed.
+b). scans the indexes, removing the tuple from the indexes.
+c). removes the tuple from the heap
+d). finally , if you asked for ANALYZE it will do that and will update 
+   pg_database frozen xmin column(datfrozenxmin) and the minimum mxid column(datminmxid).
+
+
+How many tuples can be remembered is controlled my "maintenance_work_mem".
+if you have maintenance_work_mem set to low it starts scanning 
+
+
+

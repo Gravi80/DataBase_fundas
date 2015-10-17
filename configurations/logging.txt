@@ -13,3 +13,7 @@ log_min_duration_statement  => allows u to specify a value , let say u specify 2
 
 
 statement_timeout => allows u to specify a value , let say u specify 200ms/2s. any query which takes more than 200ms will be timeouted/cancelled and will be recorded in the log.
+
+
+autovacuum = on
+log_autovacuum_min_duration = 1000

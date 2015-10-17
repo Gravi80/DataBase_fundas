@@ -26,6 +26,12 @@ $pg_ctl -D /usr/local/var/postgres -l /usr/local/var/postgres/server.log start
 SELECT pg_reload_conf();
 
 
+-- generate a series of numbers and insert it into a table
+INSERT INTO numbers (num) VALUES ( generate_series(1,1000));
+-- This inserts 1,2,3 to 1000 as thousand rows in the table numbers.
+
+
+
 -- Get number of rows of all tables in a database
 
 SELECT schemaname,relname,n_live_tup number_of_rows
@@ -86,24 +92,98 @@ database.
 */  
 
 
+
+
+
+# find the largest table in the postgreSQL database?
+SELECT relname, relpages FROM pg_class ORDER BY relpages DESC;
+-- relname = name of the relation/table.
+-- relpages = relation pages ( number of pages, by default a page is 8kb )
+
+
+
+
 -- Find relation sizes in PostgreSQL
 
-select
-  n.nspname as "Schema",
-  c.relname as "Name",
-  case c.relkind
-     when 'r' then 'table'
-     when 'v' then 'view'
-     when 'i' then 'index'
-     when 'S' then 'sequence'
-     when 's' then 'special'
-  end as "Type",
-  pg_catalog.pg_get_userbyid(c.relowner) as "Owner",
-  pg_catalog.pg_size_pretty(pg_catalog.pg_relation_size(c.oid)) as "Size"
-from pg_catalog.pg_class c
- left join pg_catalog.pg_namespace n on n.oid = c.relnamespace
-where c.relkind IN ('r', 'v', 'i')
-order by pg_catalog.pg_relation_size(c.oid) desc;
+/*
+
+\l+         => shows database size
+\d+         => Show table sizes
+\dti+       => shows both tables and indexes size
+
+*/
+
+
+SELECT
+    table_name,
+    pg_size_pretty(table_size) AS table_size,
+    pg_size_pretty(indexes_size) AS indexes_size,
+    pg_size_pretty(total_size) AS total_size
+FROM (
+    SELECT
+        table_name,
+        pg_table_size(table_name) AS table_size,
+        pg_indexes_size(table_name) AS indexes_size,
+        pg_total_relation_size(table_name) AS total_size
+    FROM (
+        SELECT ('"' || table_schema || '"."' || table_name || '"') AS table_name
+        FROM information_schema.tables where table_schema = 'public'
+    ) AS all_tables
+    ORDER BY total_size DESC
+) AS pretty_sizes;
+
+
+
+SELECT relname as "Table",
+pg_size_pretty(pg_total_relation_size(relid)) As "Size",
+pg_size_pretty(pg_total_relation_size(relid) - pg_relation_size(relid)) as "External Size"
+FROM pg_catalog.pg_statio_user_tables 
+ORDER BY pg_total_relation_size(relid) DESC;
+
+
+
+SELECT pg_size_pretty(pg_relation_size('public.wagers')) relation_size, pg_size_pretty(pg_table_size('public.wagers')) table_size;
+
+/*
+
+pg_table_size = 
+pg_relation_size = measures the size of the actual table 
+pg_total_relation_size = includes both the table and all its toasted tables and indexes.
+
+*/
+
+
+-- How to determine the size of a database on disk
+SELECT pg_size_pretty(pg_database_size('somedatabase')) As fulldbsize;
+
+
+
+
+-- Index size/usage statistics
+SELECT
+    t.tablename,
+    indexname,
+    c.reltuples AS num_rows,
+    pg_size_pretty(pg_relation_size(quote_ident(t.tablename)::text)) AS table_size,
+    pg_size_pretty(pg_relation_size(quote_ident(indexrelname)::text)) AS index_size,
+    CASE WHEN indisunique THEN 'Y'
+       ELSE 'N'
+    END AS UNIQUE,
+    idx_scan AS number_of_index_scans,
+    idx_tup_read AS tuples_read,
+    idx_tup_fetch AS tuples_fetched
+FROM pg_tables t
+LEFT OUTER JOIN pg_class c ON t.tablename=c.relname
+LEFT OUTER JOIN
+    ( SELECT c.relname AS ctablename, ipg.relname AS indexname, x.indnatts AS number_of_columns, idx_scan, idx_tup_read, idx_tup_fetch, indexrelname, indisunique FROM pg_index x
+           JOIN pg_class c ON c.oid = x.indrelid
+           JOIN pg_class ipg ON ipg.oid = x.indexrelid
+           JOIN pg_stat_all_indexes psai ON x.indexrelid = psai.indexrelid )
+    AS foo
+    ON t.tablename = foo.ctablename
+WHERE t.schemaname='public'
+ORDER BY 1,2;
+
 
 
 create encrypted password for user
@@ -114,9 +194,29 @@ create user bar encrypted password 'foopassword';
 select usename,passwd from pg_shadow where usename in ('postgres','foo','bar');
 
 
+-- Storing the password after encryption.
+SELECT crypt ( 'sathiya', gen_salt('md5') );
+
+/*
+
+PostgreSQL crypt function Issue:
+
+The postgreSQL crypt command may not work on your environment and display the following error message.
+
+ERROR:  function gen_salt("unknown") does not exist
+HINT:  No function matches the given name and argument types.
+         You may need to add explicit type casts.
+PostgreSQL crypt function Solution:
+
+To solve this problem, install the postgresql-contrib-your-version package and execute the following command in the postgreSQL prompt.
+
+# \i /usr/share/postgresql/8.1/contrib/pgcrypto.sql
+
+*/
+
+
 -- Bulk update
 update online_attributes set user_id = c.user_id from (values(3946, 1),(3947, 2)) as c(player_id, user_id) where c.player_id = online_attributes.person_id;
-
 
 
 

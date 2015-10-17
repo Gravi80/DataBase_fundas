@@ -1,3 +1,5 @@
+http://www.databasesoup.com/2012/09/freezing-your-tuples-off-part-1.html
+
 A Freeze vacuum must scan and clean every single page so when vacuum is freezing if it can't acquire the CleanUp lock it will sit and wait and that can cuase other problems.
 Because it is sitting for the cleanup lock any body else who want to access that page then have to wait and sit behind the vacuum.
 
@@ -26,3 +28,44 @@ to see the counter -> for transaction there is function get_current_snapshot() w
 
 txid.current
 dat_frozen_xid -> tells you oldest non frozen transaction ID in each database.
+
+
+
+
+
+You can see how close you are to autovacuum freeze anywhere with this query:
+============================================================================
+select max(age(datfrozenxid)) from pg_database;
+
+
+However, you don't generally really care about that; what you care about is "how close am I to forced autovacuum freeze on a large table?"  Here's that:
+======================================
+
+SELECT relname, age(relfrozenxid) as xid_age, 
+    pg_size_pretty(pg_table_size(oid)) as table_size
+FROM pg_class 
+WHERE relkind = 'r' and pg_table_size(oid) > 1073741824
+ORDER BY age(relfrozenxid) DESC LIMIT 20;
+
+
+More specifically, that says "give me the top 20 tables over 1GB, sorted by the age of their oldest XID".  Results look something like this:
+
+        relname         |  xid_age  | table_size 
+------------------------+-----------+------------
+ postgres_log           | 199785216 | 12 GB
+ statements             |   4551790 | 1271 MB
+ normal_statement_times |        31 | 12 GB
+
+
+  We see that postgres_log is at an XID age of 199 million, which is awfully close to the default autovacuum_freeze_max_age of 200 million.  And having autovac decide to read and rewrite an entire 12GB table, possibly at peak usage times, can cause unexpected poor application performance. 
+
+
+ One thing we can do is raise autovacuum_freeze_max_age.  The default, 200m, is very conservative; it's only 10% of our shut-down-the-database threshold.  On high-transaction-volume databases, I generally raise it to 1 billion, which is still only the 50% mark.
+
+ However, that's just putting off the problem.  What we should do is manually freeze the table at at time which is convenient for the application, i.e. during a low activity period or a scheduled downtime.  Then we run:
+
+
+ VACUUM FREEZE postgres_log; 
+
+
+ 

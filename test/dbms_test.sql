@@ -50,7 +50,8 @@ delete from ( SELECT dept_no,ROW_NUMBER() OVER (PARTITION BY  dept_no) AS rn FRO
 
 -- Q2). Select employee having 4th highest salary.
 select * from (select salary,rank() over(order by salary desc) from employee where salary IS NOT NULL)emp where rank=4;
-
+-- Try this to get the middle value of a column:
+SELECT id FROM tbl_1 ORDER BY id DESC LIMIT 1 OFFSET (SELECT COUNT(id) FROM tbl_1)/2;
 
 -- Q3).Write a Query to get the employee details from “employee” table who joined before January 1st 1970.
 explain analyze select * from employee where hire_date > to_date('01 jan 1970','DD Mon YYYY');

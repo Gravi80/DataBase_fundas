@@ -1,3 +1,20 @@
+To guarantee transaction isolation (that’s the “I” in “ACID”), Postgres implements a concurrency control model called MVCC (Multiversion Concurrency Control) that ensures that each ongoing SQL statement sees a consistent snapshot of data regardless of what changes may have occurred on the underlying data.
+
+By extension, that means that rows that are deleted from a Postgres database are not actually deleted immediately, but rather only flagged as deleted so that they’ll still be available to any open snapshots that may still have use for them. When they’re no longer needed in any snapshot, a VACUUM process will perform a pass and safely delete them more permanently.
+
+
+
+The vacuum process is also used to address the separate problem of transaction id wraparound. 
+In order to manage both consistency and concurrency, rows are assigned a transaction id relating to when they were created, and transactions can only see rows whose transaction id is before their own transaction id. 
+As with any fixed-size integer, transaction ids can wrap around. To deal with this, the 32-bit transaction id space behaves as a circular space, where the previous 2 billion transactions are in the "past" and the next 2 billion transactions are in the "future". But in order for a table to contain rows that span more than 2 billion transactions, an additional step is necessary: very old rows are assigned a special value that indicates that they're in the past for all current and future transactions. This is called "freezing" a tuple. When deemed necessary, routine vacuuming will perform an extra full table scan just to make sure old tuples are frozen. Administrators can do this themselves using the "VACUUM FREEZE" operation. (This is all a gross simplification of the underlying concerns.
+
+PostgreSQL has an autovacuum mechanism that's intended to kick off vacuum operations as needed to deal with both of the above problems. It cleans up old tuples and, if necessary, scans the entire table to freeze very old tuples.
+
+
+
+
+
+
 In dataBases you have two choices to ensure you have consitent data :
 1). You can do locking (sucks)
 2). You can use Multi Version Concurrency Control, meaning when u do a delete or update the old data does not 	  get removed.
@@ -5,3 +22,53 @@ In dataBases you have two choices to ensure you have consitent data :
 
 postgres uses the second option.
 Eventually these old dead tuples must be removed.	
+
+
+The flags that power MVCC are visible as “hidden” columns on any Postgres table called xmin and xmax. Let’s take a simple example where we’re holding a few unworked jobs in a Que table:
+
+
+# select xmin, xmax, job_id from que_jobs limit 5;
+
+xmin  | xmax | job_id
+-------+------+--------
+ 89912 |    0 |  25865
+ 89913 |    0 |  25866
+ 89914 |    0 |  25867
+ 89915 |    0 |  25868
+ 89916 |    0 |  25869
+
+
+ Every write transaction in Postgres is assigned a transaction ID (xid).
+
+ The xmin column defines the minimum transaction ID for which a particular row becomes visible (i.e. the xid where it was created). 
+
+ xmax defines the maximum xid bound that the row is available. As above, for a row that’s still available to any new transaction, that number is set to 0.
+
+
+ If we start a new transaction from a different console:
+
+term-B-# start transaction isolation level serializable;
+START TRANSACTION
+
+Then remove one of the jobs from outside that new transaction:
+
+term-A-# delete from que_jobs where job_id = 25865;
+DELETE 1
+
+
+We can see that the removed row (which is still visible from our second transaction), now has its xmax set:
+
+term-B-# select xmin, xmax, job_id from que_jobs limit 5;
+ xmin  | xmax  | job_id
+-------+-------+--------
+ 89912 | 90505 |  25865
+ 89913 |     0 |  25866
+ 89914 |     0 |  25867
+ 89915 |     0 |  25868
+ 89916 |     0 |  25869
+(5 rows)
+
+A new operation in the database will be assigned a xid of 90506 or higher, and job_id 25865 will be invisible to it.
+
+
+
