@@ -38,7 +38,7 @@ select * from pg_locks where granted=false;
 -- You need to find out who has the conflicting lock and take appropriate steps to get that lock released
 -- For most lock types, you can get this information from pg_locks, too:
 -- look for locks on the same object that have granted = true.
-select * from pg_locks where relation= and granted=true;
+select * from pg_locks where relation=(select relation from pg_locks where granted=false) and granted=true;
 
 
 
