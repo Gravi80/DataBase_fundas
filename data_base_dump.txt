@@ -10,6 +10,13 @@ create dump file of a database
 pg_dump dbname > outfile
 pg_dump -h localhost database_name > ~/Desktop/demo/file_name.dump
 
+  Data Only dump
+  --------------
+  create table person_facts(id integer,person_id integer,facts JSONB[],primary key(id));
+  insert into person_facts values(1,123,ARRAY['{"id":"1","value":"12-07-2016"}'::jsonb]);
+  
+  $pg_dump -U Ravi --no-owner --column-inserts --data-only -d postgres -t person_facts > dump_file.sql
+
 
 restore dump file in database
 -----------------------------
